@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Registro de usuario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background-color: #8A2BE2;
+      font-family: "Times New Roman", serif;
+      text-align: center;
+    }
+    
+    .container {
+      margin-top: 200px;
+    }
+    
+    .form {
+      display: inline-block;
+      background-color: white;
+      padding: 20px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .button-container button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <a href="/" class="button">Atrás</a>
+  </div>
+  
+  <div class="container">
+    <div class="form">
+      <h2>Registro de usuario</h2>
+      <form action="/registros" method="post">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required><br><br>
+        
+        <label for="correo">Correo electrónico:</label>
+        <input type="email" id="correo" name="correo" required><br><br>
+        
+        <label for="rut_reg">RUT:</label>
+        <input type="text" id="rut_reg" name="rut_reg" required><br><br>
+        
+        <label for="dv_rut">Dígito verificador:</label>
+        <input type="text" id="dv_rut" name="dv_rut" required><br><br>
+        
+        <label for="password_reg">Contraseña:</label>
+        <input type="password" id="password_reg" name="password_reg" required><br><br>
+        
+        <input type="submit" value="Registrarse">
+      </form>
+    </div>
+  </div>
+</body>
+</html>

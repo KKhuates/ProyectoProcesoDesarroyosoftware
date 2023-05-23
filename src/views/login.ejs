@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Iniciar sesión</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background-color: #8A2BE2;
+      font-family: "Times New Roman", serif;
+      text-align: center;
+    }
+    
+    .container {
+      margin-top: 200px;
+    }
+    
+    .form {
+      display: inline-block;
+      background-color: white;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container">
+    <a href="/" class="button">Atrás</a>
+  <div class="container">
+    <div class="form">
+      <h2>Iniciar sesión</h2>
+      <form action="/login" method="post">
+        <label for="username">Nombre de usuario:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <input type="submit" value="Iniciar sesión">
+      </form>
+    </div>
+  </div>
+</body>
+</html>
