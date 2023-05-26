@@ -42,10 +42,11 @@ controller.iniciarSesion = (req, res) => {
       if (err) {
         return res.status(500).json(err);
       }
+      console.log('result',results);
 
       if (results.length === 0) {
         // Usuario no encontrado
-        return res.redirect('/paginaerror');
+        return res.redirect('/');
       }
 
       const user = results[0];
@@ -78,7 +79,7 @@ controller.registrarUsuario = (req, res) => {
       console.error('Error al encriptar la contraseña:', err);
       return res.status(500).send('Error al encriptar la contraseña');
     }
-
+    console.log('rut',rut_reg)
     console.log('Contraseña ingresada:', password_reg);
     console.log('Contraseña cifrada:', hashedPassword);
 
