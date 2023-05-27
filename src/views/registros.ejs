@@ -5,59 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      background-color: #8A2BE2;
-      font-family: "Times New Roman", serif;
-      text-align: center;
+      font-family: "Arial", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f3f3f3;
     }
     
     .container {
-      margin-top: 200px;
-    }
-    
-    .form {
-      display: inline-block;
-      background-color: white;
-      padding: 20px;
+      width: 300px;
+      padding: 16px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
     }
 
-    .button-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
+    .container input[type="text"],
+    .container input[type="email"],
+    .container input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
 
-    .button-container button {
-      margin-right: 10px;
+    .container input[type="submit"] {
+      width: 100%;
+      padding: 8px;
+      color: #fff;
+      background-color: #4285F4;
+      border: none;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <div class="button-container">
-    <a href="/" class="button">Atrás</a>
-  </div>
-  
   <div class="container">
-    <div class="form">
-      <h2>Registro de usuario</h2>
-      <form action="/registros" method="post">
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre" required><br><br>
-        
-        <label for="correo">Correo electrónico:</label>
-        <input type="email" id="correo" name="correo" required><br><br>
-        
-        <label for="rut_reg">RUT:</label>
-        <input type="text" id="rut_reg" name="rut_reg" required><br><br>
-        
-        <label for="dv_rut">Dígito verificador:</label>
-        <input type="text" id="dv_rut" name="dv_rut" required><br><br>
-        
-        <label for="password_reg">Contraseña:</label>
-        <input type="password" id="password_reg" name="password_reg" required><br><br>
-        
-        <input type="submit" value="Registrarse">
-      </form>
-    </div>
+    <h2>Registro de usuario</h2>
+    <form action="/registros" method="post">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" required><br><br>
+      <label for="correo">Correo electrónico:</label>
+      <input type="email" id="correo" name="correo" required><br><br>
+      <label for="rut_reg">RUT:</label>
+      <input type="text" id="rut_reg" name="rut_reg" required><br><br>
+      <label for="dv_rut">Dígito verificador:</label>
+      <input type="text" id="dv_rut" name="dv_rut" required><br><br>
+      <label for="password_reg">Contraseña:</label>
+      <input type="password" id="password_reg" name="password_reg" required><br><br>
+      <input type="submit" value="Registrar">
+    </form>
   </div>
 </body>
 </html>

@@ -5,22 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      background-color: #8A2BE2;
-      font-family: "Times New Roman", serif;
-      text-align: center;
+      font-family: "Arial", sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f3f3f3;
     }
     
-    h1 {
-      margin-top: 200px;
-      font-size: 30px;
+    .button {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      text-decoration: none;
+      background-color: #4285F4;
       color: white;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-    <a href="/" class="button">Atrás</a>
-  <h1> Felicidades estas dentro del app 
-    Diego ibani no hizo nada 0 puntos
-  </h1>
+  <h1>Bienvenido al Menú Principal</h1>
+  <a href="/subir_consultoria" class="button">Subir Consultoría</a>
+  <a href="/ver_consultoria" class="button">Ver Consultoría</a>
+  <a href="/historial_consultorias" class="button">Historial de Consultorías</a>
 </body>
 </html>
