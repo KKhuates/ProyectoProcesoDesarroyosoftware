@@ -7,7 +7,7 @@ CREATE TABLE `usuario` (
   `nombre` varchar(255) NOT NULL,
   `correo_electronico` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `id_tipo_usuario` int(11) NOT NULL,
+  `id_tipo_usuario` int(11),
   `rut` int(11) DEFAULT NULL,
   `rut_id` varchar(1) DEFAULT NULL,
   PRIMARY KEY (`id_usuario`)
@@ -21,6 +21,9 @@ CREATE TABLE `tipo_usuario` (
   `evaluador` int(11) DEFAULT NULL,
   PRIMARY KEY (`id_tipo_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  INSERT INTO tipo_usuario (tipo) VALUES (1);
+  INSERT INTO tipo_usuario (tipo) VALUES (2);
+  INSERT INTO tipo_usuario (tipo) VALUES (3);
 
 CREATE TABLE `evaluador` (
   `id_evaluador` int(11) NOT NULL AUTO_INCREMENT,
