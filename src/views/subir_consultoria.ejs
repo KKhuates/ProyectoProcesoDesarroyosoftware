@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Iniciar sesión</title>
+  <title>Subir Consultoría</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
@@ -27,22 +27,9 @@
       width: 300px;
     }
     
-    .button,
-    .submit-button {
+    .button, .submit-button {
       display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      text-decoration: none;
-      background-color: #4285F4;
-      color: white;
-      border-radius: 5px;
-      border: none;
-    }
-
-    .back-button {
-      display: block;
-      margin: 10px auto;
+      margin: 10px auto; /* centrado */
       padding: 10px 20px;
       font-size: 16px;
       text-decoration: none;
@@ -55,17 +42,17 @@
 </head>
 <body>
   <div class="container">
+    <a href="/" class="button">Atrás</a>
     <div class="form">
-      <h2>Iniciar sesión</h2>
-      <form action="/login" method="post">
-        <label for="username">Nombre de usuario:</label><br>
-        <input type="text" id="username" name="username" required><br><br>
-        <label for="password">Contraseña:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" class="submit-button" value="Iniciar sesión">
+      <h2>Subir Consultoría</h2>
+      <form action="/subir_consultoria" method="post" enctype="multipart/form-data">
+        <label for="file">Archivo:</label><br>
+        <input type="file" id="file" name="file" required><br><br>
+        <label for="descripcion">Descripción:</label><br>
+        <textarea id="descripcion" name="descripcion" rows="4" cols="50" required></textarea><br><br>
+        <input type="submit" class="submit-button" value="Subir">
       </form>
     </div>
-    <a href="/" class="back-button">Atrás</a>
   </div>
 </body>
 </html>
