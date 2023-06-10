@@ -55,6 +55,17 @@ CREATE TABLE `estado_consultoria` (
   FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `archivoSolicitud` (
+  `id_archivos` int(11) NOT NULL AUTO_INCREMENT,
+  `id_usuario` int(11) NOT NULL,
+  `id_consultoria` int(11) NOT NULL,
+  `archivo` longblob NOT NULL,
+  `fecha_subida` datetime NOT NULL,
+  PRIMARY KEY (`id_archivos`),
+  FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  FOREIGN KEY (`id_consultoria`) REFERENCES `consultoria` (`id_consultoria`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 ALTER TABLE `usuario`
   ADD CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`id_tipo_usuario`) REFERENCES `tipo_usuario` (`id_tipo_usuario`);
 
