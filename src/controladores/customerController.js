@@ -10,11 +10,11 @@ const pool = mysql.createPool({
   password: '',
   database: 'bd_solicitud'
 });
-
+ 
 const iniciarSesion = function(req, res) {
-  const rut = req.body.rut;
-  const password = req.body.password;
-
+  exports.iniciarSesion = (req, res) => {
+    const rut = req.body.rut;
+    const password = req.body.password;
   pool.getConnection((err, conn) => {
     if (err) {
       return res.status(500).json(err);
@@ -43,19 +43,20 @@ const iniciarSesion = function(req, res) {
           return res.redirect('/menuprincipal');
         } else {
           // Contraseña incorrecta
-          return res.redirect('/');
+          return res.redirect('/paginaerror');
         }
       });
     });
 
     conn.release();
   });
+}
 };
 
 const registrarUsuario = function(req, res) {
   const { nombre, correo, rut_reg, dv_rut, password_reg } = req.body;
-
-  // Generar el hash de la contraseña
+  console.log("este es el nombre: ->",nombre);
+  console.log("req-->",req.body);
   bcrypt.hash(password_reg, 10, (err, hashedPassword) => {
     if (err) {
       console.error('Error al encriptar la contraseña:', err);
@@ -71,7 +72,7 @@ const registrarUsuario = function(req, res) {
       }
 
       // Aquí obtenemos el id_tipo_usuario para 'normal'
-      conn.query('SELECT id_tipo_usuario FROM tipo_usuario WHERE tipo = ?', ['normal'], (err, results) => {
+      conn.query('SELECT id_tipo_usuario FROM tipo_usuario WHERE tipo = ?', ['1'], (err, results) => {
         if (err) {
           console.error('Error al obtener el id_tipo_usuario:', err);
           return res.status(500).send('Error al obtener el id_tipo_usuario: ' + err.message);
@@ -123,13 +124,6 @@ const mostrarInicio = function(req, res) {
   res.render('inicio');
 };
 
-const mostrarFormularioLogin = function(req, res) {
-  res.render('login');
-};
-
-const mostrarFormularioRegistro = function(req, res) {
-  res.render('registros');
-};
 
 const mostrarFormularioSubirConsultoria = function(req, res) {
   const file = req.file;
@@ -178,8 +172,6 @@ module.exports = {
   mostrarMenuPrincipal,
   paginaError,
   mostrarInicio,
-  mostrarFormularioLogin,
-  mostrarFormularioRegistro,
   mostrarFormularioSubirConsultoria,
   upload
 };

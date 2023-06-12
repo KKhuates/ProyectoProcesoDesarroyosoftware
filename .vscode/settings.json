@@ -1,0 +1,6 @@
+{
+    "genieai.promptPrefix.addTests-enabled": true,
+    "codegpt.temperature": 0.3,
+    "codegpt.model": "ChatGPT",
+    "genieai.openai.model": "gpt-4"
+}
