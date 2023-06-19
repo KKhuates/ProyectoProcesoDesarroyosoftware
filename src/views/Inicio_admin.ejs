@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Page</title>
+</head>
+<body>
+  <h1>Página de administración</h1>
+  <table>
+    <tr>
+      <th>Usuario</th>
+      <th>Correo</th>
+      <th>RUT</th>
+      <th>Archivo de consultoría</th>
+      <!-- Aquí puedes agregar los demás campos que desees mostrar -->
+    </tr>
+    <% usuariosConsultorias.forEach(function(usuarioConsultoria) { %>
+      <tr>
+        <td><%= usuarioConsultoria.nombre %></td>
+        <td><%= usuarioConsultoria.correo_electronico %></td>
+        <td><%= usuarioConsultoria.rut %></td>
+        <td><%= usuarioConsultoria.nombre_archivo %></td>
+        <!-- Aquí puedes agregar los demás campos que desees mostrar -->
+      </tr>
+    <% }); %>
+  </table>
+</body>
+</html>

@@ -1,22 +1,5 @@
 {
-  "name": "proyecto-desarrollo-de-software",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon src/APP.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.0",
-    "ejs": "^3.1.9",
-    "express": "^4.18.2",
-    "express-myconnection": "^1.0.4",
-    "express-session": "^1.17.3",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "mysql": "^2.18.1"
-  },
-  "description": ""
+    "bcrypt": "^5.1.0"
+  }
 }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Página del administrador</title>
+</head>
+<body>
+  <h1>Administrador</h1>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Correo Electrónico</th>
+      <th>RUT</th>
+      <th>Contraseña</th>
+      <th>Acciones</th>
+    </tr>
+    <% usuarios.forEach(function(usuario) { %>
+      <tr>
+        <td><%= usuario.id_usuario %></td>
+        <td><%= usuario.nombre %></td>
+        <td><%= usuario.correo_electronico %></td>
+        <td><%= usuario.rut %></td>
+        <td><%= usuario.contrasena %></td>
+        <td>
+          <a href="/admin/editarUsuario/<%= usuario.id_usuario %>">Editar</a>
+          <form action="/admin/eliminarUsuario/<%= usuario.id_usuario %>" method="POST">
+            <input type="submit" value="Eliminar">
+          </form>
+        </td>
+      </tr>
+    <% }); %>
+  </table>
+
+  <h2>Consultorías</h2>
+  <table>
+    <tr>
+      <th>ID de la consultoría</th>
+      <th>ID del usuario</th>
+      <th>Nombre del archivo</th>
+      <th>Acciones</th>
+    </tr>
+    <% consultorias.forEach(function(consultoria) { %>
+      <tr>
+        <td><%= consultoria.id_consultoria %></td>
+        <td><%= consultoria.id_usuario %></td>
+        <td><%= consultoria.nombre_archivo %></td>
+        <td>
+          <a href="/admin/editarConsultoria/<%= consultoria.id_consultoria %>">Editar</a>
+          <form action="/admin/eliminarConsultoria/<%= consultoria.id_consultoria %>" method="POST">
+            <input type="submit" value="Eliminar">
+          </form>
+        </td>
+      </tr>
+    <% }); %>
+  </table>
+</body>
+</html>

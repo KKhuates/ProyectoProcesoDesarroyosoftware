@@ -1,0 +1,38 @@
+<table>
+    <tr>
+      <th>Nombre Archivo</th>
+      <th>Descargar Archivo</th>
+      <th>Agregar Nota</th>
+      <th>Cambiar Estado</th>
+    </tr>
+    <% consultorias.forEach(function(consultoria) { %>
+    <tr>
+      <td><%= consultoria.nombre_archivo %></td>
+      <td>
+        <!-- Aquí necesitarías implementar la lógica para descargar el archivo -->
+        <button>Descargar Archivo</button>
+      </td>
+      <td>
+        <!-- Aquí podrías tener un formulario para agregar una nota a la consultoría -->
+        <form method="POST" action="/agregar_nota">
+          <input type="hidden" name="id_consultoria" value="<%= consultoria.id %>">
+          <input type="text" name="nota">
+          <button type="submit">Agregar Nota</button>
+        </form>
+      </td>
+      <td>
+        <!-- Aquí podrías tener un formulario para cambiar el estado de la consultoría -->
+        <form method="POST" action="/cambiar_estado">
+          <input type="hidden" name="id_consultoria" value="<%= consultoria.id %>">
+          <select name="estado">
+            <option value="Aceptada">Aceptada</option>
+            <option value="Rechazada">Rechazada</option>
+            <option value="En análisis">En análisis</option>
+          </select>
+          <button type="submit">Cambiar Estado</button>
+        </form>
+      </td>
+    </tr>
+    <% }); %>
+  </table>
+  
