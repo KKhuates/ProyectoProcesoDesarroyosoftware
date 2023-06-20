@@ -34,5 +34,5 @@ app.use('/', customerRoutes);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(app.get('port'), () => {
-  console.log('Server on port 3000');
+  console.log('Server on port 3000' );
 });

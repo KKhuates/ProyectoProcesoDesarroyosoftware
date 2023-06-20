@@ -57,13 +57,14 @@
   <div class="container">
     <div class="form">
       <h2>Iniciar sesión</h2>
-      <form action="/inicio" method="get">
+      <form action="/login" method="post">
         <label for="username">Rut del usuario:</label><br>
-        <input type="text" id="rut" name="rut_inicio" required><br><br>
+        <input type="text" id="rut" name="rut" required><br><br>
         <label for="password">Contraseña:</label><br>
-        <input type="password" id="password" name="password_inicio" required><br><br>
+        <input type="password" id="password" name="password" required><br><br>
         <input type="submit" class="submit-button" value="Iniciar sesión">
       </form>
+      
     </div>
     <a href="/" class="back-button">Atrás</a>
   </div>

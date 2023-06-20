@@ -1,5 +1,5 @@
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'Uploads/' });
 const bcrypt = require('bcrypt');
 const mysql = require('mysql');
 const fs = require('fs');
@@ -13,8 +13,8 @@ const pool = mysql.createPool({
 });
 
 const iniciarSesion = function(req, res) {
-  const rutUsuario = req.body.rut_inicio;
-  const password = req.body.password_inicio;
+  const rutUsuario = req.body.rut;
+  const password = req.body.password;
 
   pool.getConnection((err, conn) => {
     if (err) {
@@ -54,6 +54,7 @@ const iniciarSesion = function(req, res) {
             case 3: // 3 correspondiente al comité
               return res.redirect('/Inicio_comite');
             default:
+              console.log('inicio aqui ?0');
               return res.redirect('/inicio'); // agregar página de usuario sin rol
           }
         } else {
@@ -201,7 +202,7 @@ const subirConsultoria = function(req, res) {
 
     const consultoria = {
       nombre_archivo: file.originalname,
-      documento_archivo: fs.readFileSync(path.join(__dirname, '/../uploads/', file.filename)),
+      documento_archivo: fs.readFileSync(path.join(__dirname, '/../Uploads/', file.filename)),
       fecha_subida_archivo: new Date(),
       id_usuario: req.session.userId
     };
@@ -214,7 +215,7 @@ const subirConsultoria = function(req, res) {
 
       // Intentar borrar el archivo de la carpeta 'uploads'
       try {
-        fs.unlinkSync(path.join(__dirname, '/../uploads/', file.filename));
+        fs.unlinkSync(path.join(__dirname, '/../Uploads/', file.filename));
       } catch (err) {
         console.error('Hubo un error al intentar eliminar el archivo:', err);
       }

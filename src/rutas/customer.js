@@ -14,7 +14,7 @@ router.get('/Inicio_cimite',customerController.mostrarInicioComite);
 
 
 router.post('/eliminarUsuario/:rut', customerController.eliminarUsuario);
-router.post('/login', customerController.iniciarSesion);
+
 router.post('/registros', customerController.registrarUsuario);
 router.post('/subir_consultoria', upload.single('file'), customerController.mostrarFormularioSubirConsultoria);
 
