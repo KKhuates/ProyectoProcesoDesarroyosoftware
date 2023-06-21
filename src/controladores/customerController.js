@@ -30,13 +30,11 @@ const iniciarSesion = function(req, res) {
 
       if (results.length === 0) {
         // Usuario no encontrado
-        console.log("usuario no encontrado -->",results);
-        console.log("usuario de la tabla",rutUsuario);
         return res.status(404).send('Usuario no encontrado'); // Enviar un mensaje de error
       }
 
       const user = results[0];
-      console.log("resultado?",results[0]);
+      
       bcrypt.compare(password, user.password, (err, result) => {
         if (err) {
           console.log("error?", err);
@@ -47,21 +45,21 @@ const iniciarSesion = function(req, res) {
           console.log("tipo de usuario", user.id_tipo_usuario);
           // Contraseña correcta, redireccionar a la página de inicio del usuario
           switch (user.id_tipo_usuario) {
-            case 1: // 1 correspondiente a estudiantes
-              return res.redirect('/Inicio_estudiante');
-            case 2: // 2 correspondiente a administradores
+            case 1: // 1 correspondiente a Estudiantes
+              return res.redirect('/Inicio_Estudiante');
+            case 2: // 2 correspondiente a Administradores
+              console.log('hola -<');
               return res.redirect('/Inicio_admin');
             case 3: // 3 correspondiente al comité
-              return res.redirect('/Inicio_comite');
+              return res.redirect('/Inicio_Comite');
             default:
-              console.log('inicio aqui ?0');
+              
               return res.redirect('/inicio'); // agregar página de usuario sin rol
           }
         } else {
-          console.log("contraseña password ->", password);
-          console.log("contraseña user.password ->", user.password);
+          
           // Contraseña incorrecta
-          console.log("Contraseña incorrecta");
+          
           return res.redirect('/');
         }
       });
@@ -69,11 +67,12 @@ const iniciarSesion = function(req, res) {
   });
 };
 
-
-
+const registros_admin = (req, res) => {
+  res.render('registros');
+};
 
 const registrarUsuario = function(req, res) {
-  const { nombre, correo, rut_reg, dv_rut, password_reg } = req.body;
+  const { nombre, correo, rut_reg, dv_rut, password_reg, tipo_usuario } = req.body;
 
   // Generar el hash de la contraseña
   bcrypt.hash(password_reg, 10, (err, hashedPassword) => {
@@ -90,14 +89,21 @@ const registrarUsuario = function(req, res) {
         return res.status(500).send('Error en la conexión a la base de datos');
       }
 
-      // Aquí obtenemos el id_tipo_usuario para 'normal'
-      conn.query('SELECT id_tipo_usuario FROM tipo_usuario WHERE tipo = ?', ['normal'], (err, results) => {
+      // Verificar que el tipo de usuario sea válido
+      const tipoUsuarioValido = ['Estudiante', 'Comite', 'Administrador'];
+      if (!tipoUsuarioValido.includes(tipo_usuario)) {
+        console.error('Tipo de usuario no válido:', tipo_usuario);
+        return res.status(400).send('Tipo de usuario no válido');
+      }
+
+      // Obtener el id_tipo_usuario según el tipo seleccionado
+      conn.query('SELECT id_tipo_usuario FROM tipo_usuario WHERE tipo = ?', [tipo_usuario], (err, results) => {
         if (err) {
           console.error('Error al obtener el id_tipo_usuario:', err);
           return res.status(500).send('Error al obtener el id_tipo_usuario: ' + err.message);
         }
 
-        // Verificamos que obtuvimos al menos un resultado
+        // Verificar que se encontró el id_tipo_usuario
         if (results.length > 0) {
           const id_tipo_usuario = results[0].id_tipo_usuario;
 
@@ -108,8 +114,9 @@ const registrarUsuario = function(req, res) {
             rut: rut_reg,
             rut_id: dv_rut,
             password: hashedPassword,
-            id_tipo_usuario: id_tipo_usuario // Aquí insertamos el id_tipo_usuario en el objeto usuario
+            id_tipo_usuario: id_tipo_usuario
           };
+          console.log('tipo usuario-->', id_tipo_usuario);
 
           conn.query('INSERT INTO usuario SET ?', usuario, (err, result) => {
             if (err) {
@@ -118,11 +125,11 @@ const registrarUsuario = function(req, res) {
             }
 
             // Redireccionar a la página de inicio de sesión después del registro exitoso
-            res.redirect('/inicio');
+            res.redirect('/login');
           });
         } else {
-          console.error('No se encontró ningún tipo de usuario con el nombre "normal".');
-          return res.status(500).send('No se encontró ningún tipo de usuario con el nombre "normal".');
+          console.error('No se encontró ningún tipo de usuario con el nombre:', tipo_usuario);
+          return res.status(500).send('No se encontró ningún tipo de usuario con el nombre: ' + tipo_usuario);
         }
       });
 
@@ -130,6 +137,7 @@ const registrarUsuario = function(req, res) {
     });
   });
 };
+
 
 const mostrarInicio = (req, res) => {
   res.render('inicio');
@@ -151,7 +159,7 @@ const mostrarInicioComite = function(req, res) {
       }
 
       // Renderizar la vista con los datos obtenidos
-      res.render('Inicio_comite', { consultorias: consultorias });
+      res.render('Inicio_Comite', { consultorias: consultorias });
     });
 
     conn.release();
@@ -161,7 +169,9 @@ const mostrarInicioComite = function(req, res) {
 const mostrarInicioAdmin = function(req, res) {
   pool.getConnection((err, conn) => {
     if (err) {
+      console.log('dentro del err');
       return res.status(500).send('Error en la conexión a la base de datos');
+      
     }
 
     conn.query('SELECT * FROM usuario', (err, usuarios) => {
@@ -183,16 +193,12 @@ const mostrarInicioAdmin = function(req, res) {
   });
 };
 
-const mostrarFormularioSubirConsultoria = function(req, res) {
-  res.render('subir_consultoria');
-};
-
 const subirConsultoria = function(req, res) {
   const file = req.file;
-  const { titulo, descripcion } = req.body;
+  const nombreArchivo = req.body['file-name'];
 
-  if (!file) {
-    return res.status(400).send('Debe cargar un archivo.');
+  if (!file || !nombreArchivo) {
+    return res.status(400).send('Debe ingresar el nombre del archivo y cargar un archivo válido.');
   }
 
   pool.getConnection((err, conn) => {
@@ -201,10 +207,10 @@ const subirConsultoria = function(req, res) {
     }
 
     const consultoria = {
-      nombre_archivo: file.originalname,
-      documento_archivo: fs.readFileSync(path.join(__dirname, '/../Uploads/', file.filename)),
+      nombre_archivo: nombreArchivo,
+      documento_archivo: fs.readFileSync(file.path),
       fecha_subida_archivo: new Date(),
-      id_usuario: req.session.userId
+      id_usuario: req.session.usuarioId
     };
 
     conn.query('INSERT INTO consultoria SET ?', consultoria, (err, result) => {
@@ -213,117 +219,100 @@ const subirConsultoria = function(req, res) {
         return res.status(500).send('Error al subir la consultoría: ' + err.message);
       }
 
-      // Intentar borrar el archivo de la carpeta 'uploads'
+      // Intentar borrar el archivo temporal
       try {
-        fs.unlinkSync(path.join(__dirname, '/../Uploads/', file.filename));
+        fs.unlinkSync(file.path);
       } catch (err) {
         console.error('Hubo un error al intentar eliminar el archivo:', err);
       }
 
-      // Redireccionar a la página de inicio de sesión después del registro exitoso
-      res.redirect('/Inicio_estudiante');
+      // Redireccionar a la página de inicio del estudiante después de la subida exitosa
+      res.redirect('/Inicio_Estudiante');
     });
 
     conn.release();
   });
 };
 
-const obtenerUsuariosConConsultorias = function(req, res) {
+const obtenerUsuariosConConsultorias = function (req, res) {
   pool.getConnection((err, conn) => {
     if (err) {
       return res.status(500).send('Error en la conexión a la base de datos');
     }
 
-    const query = 'SELECT usuario.*, consultoria.* FROM usuario LEFT JOIN consultoria ON usuario.id_usuario = consultoria.id_usuario';
+    const query = `
+      SELECT usuario.*, consultoria.nombre_archivo, consultoria.fecha_subida_archivo, notas.nota
+      FROM usuario
+      LEFT JOIN consultoria ON usuario.id_usuario = consultoria.id_usuario
+      LEFT JOIN notas ON consultoria.id_consultoria = notas.id_consultoria
+    `;
+
     conn.query(query, (err, results) => {
       if (err) {
         return res.status(500).send('Error al obtener los usuarios y consultorías: ' + err.message);
       }
 
-      // Renderizar la vista 'admin' con los datos obtenidos
-      res.render('admin', { usuariosConsultorias: results });
-    });
+      const usuariosConsultorias = {};
 
-    conn.release();
-  });
-};
+      // Agrupar las consultorías por usuario
+      results.forEach((row) => {
+        const usuarioId = row.id_usuario;
 
-const mostrarAdmin = function(req, res) {
-  pool.getConnection((err, conn) => {
-    if (err) {
-      return res.status(500).send('Error en la conexión a la base de datos');
-    }
-
-    conn.query('SELECT * FROM usuario', (err, usuarios) => {
-      if (err) {
-        return res.status(500).send('Error al obtener los usuarios: ' + err.message);
-      }
-
-      conn.query('SELECT * FROM consultoria', (err, consultorias) => {
-        if (err) {
-          return res.status(500).send('Error al obtener las consultorías: ' + err.message);
+        if (!usuariosConsultorias[usuarioId]) {
+          usuariosConsultorias[usuarioId] = {
+            usuario: {
+              id: row.id_usuario,
+              nombre: row.nombre,
+              correo_electronico: row.correo_electronico,
+              rut: row.rut,
+            },
+            consultorias: [],
+          };
         }
 
-        // Renderizar la vista con los datos obtenidos
-        res.render('admin', { usuarios: usuarios, consultorias: consultorias });
+        const consultoria = {
+          id: row.id_consultoria,
+          nombre_archivo: row.nombre_archivo,
+          fecha_subida_archivo: row.fecha_subida_archivo,
+          nota: row.nota,
+        };
+
+        usuariosConsultorias[usuarioId].consultorias.push(consultoria);
       });
+
+      // Renderizar la vista 'Inicio_admin' con los datos obtenidos
+      res.render('Inicio_admin', { usuariosConsultorias: Object.values(usuariosConsultorias) });
     });
 
     conn.release();
   });
 };
+
 
 // Código para eliminar un usuario y todas sus consultorias asociadas
 const eliminarUsuario = function(req, res) {
-  const id_usuario = req.params.id;
+  const id_usuario = req.body.id_usuario;
 
   pool.getConnection((err, conn) => {
     if (err) {
-      return res.status(500).send('Error en la conexión a la base de datos');
+      return res.status(500).json(err);
     }
 
-    conn.query('DELETE FROM consultoria WHERE id_usuario = ?', [id_usuario], (err, result) => {
+    conn.query('DELETE FROM usuario WHERE id_usuario = ?', [id_usuario], (err, results) => {
+      conn.release();
+
       if (err) {
-        return res.status(500).send('Error al eliminar las consultorias del usuario: ' + err.message);
+        return res.status(500).json(err);
       }
 
-      conn.query('DELETE FROM usuario WHERE id_usuario = ?', [id_usuario], (err, result) => {
-        if (err) {
-          return res.status(500).send('Error al eliminar el usuario: ' + err.message);
-        }
-
-        // Redirigir al usuario a la página del admin después de la eliminación
-        res.redirect('/admin');
-      });
+      return res.status(200).json({ message: 'Usuario eliminado correctamente' });
     });
-
-    conn.release();
   });
 };
 
+
 const mostrarInicioEstudiante = function(req, res) {
-  pool.getConnection((err, conn) => {
-    if (err) {
-      return res.status(500).send('Error en la conexión a la base de datos');
-    }
-
-    conn.query('SELECT * FROM usuario WHERE id_usuario = ?', [req.session.userId], (err, usuario) => {
-      if (err) {
-        return res.status(500).send('Error al obtener los datos del usuario: ' + err.message);
-      }
-
-      conn.query('SELECT * FROM consultoria WHERE id_usuario = ?', [req.session.userId], (err, consultorias) => {
-        if (err) {
-          return res.status(500).send('Error al obtener las consultorías: ' + err.message);
-        }
-
-        // Renderizar la vista con los datos obtenidos
-        res.render('Inicio_estudiante', { usuario: usuario, consultorias: consultorias });
-      });
-    });
-
-    conn.release();
-  });
+  res.render('Inicio_Estudiante');
 };
 
 const obtenerConsultoria = function(req, res) {
@@ -334,13 +323,13 @@ const obtenerConsultoria = function(req, res) {
       return res.status(500).send('Error en la conexión a la base de datos');
     }
 
-    conn.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria], (err, consultoria) => {
+    conn.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria], (err, consultorias) => {
       if (err) {
         return res.status(500).send('Error al obtener la consultoría: ' + err.message);
       }
 
       // Renderizar la vista con los datos obtenidos
-      res.render('consultoria', { consultoria: consultoria[0] });
+      res.render('consultoria', { consultoria: consultorias[0] });
     });
 
     conn.release();
@@ -361,7 +350,7 @@ const eliminarConsultoria = function(req, res) {
       }
 
       // Redirigir al usuario a la página del comité después de la eliminación
-      res.redirect('/Inicio_comite');
+      res.redirect('/Inicio_Comite');
     });
 
     conn.release();
@@ -377,12 +366,11 @@ module.exports = {
   mostrarInicioComite,
   mostrarInicioAdmin,
   mostrarInicioEstudiante,
-  mostrarFormularioSubirConsultoria,
   subirConsultoria,
   obtenerUsuariosConConsultorias,
   eliminarUsuario,
-  mostrarAdmin,
   obtenerConsultoria,
   eliminarConsultoria,
+  registros_admin,
   upload
 };

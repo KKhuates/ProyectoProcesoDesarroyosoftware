@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -66,7 +67,15 @@
       <input type="text" id="dv_rut" name="dv_rut" required><br><br>
       <label for="password_reg">Contraseña:</label>
       <input type="password" id="password_reg" name="password_reg" required><br><br>
+      <label for="tipo_usuario">Tipo de usuario:</label>
+      <select id="tipo_usuario" name="tipo_usuario" required>
+        <option value="Estudiante">Estudiante</option>
+        <option value="Comite">Comite</option>
+        <option value="Administrador">Administrador</option>
+      </select>
+      <br><br>
       <input type="submit" value="Registrar">
+
     </form>
     <a href="/" class="back-button">Atrás</a>
   </div>

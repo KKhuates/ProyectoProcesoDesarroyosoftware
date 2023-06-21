@@ -12,7 +12,8 @@ const customerRoutes = require('./rutas/customer');
 app.set('port', process.env.PORT || 3000);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 // Middlewares
 app.use(morgan('dev'));
 
@@ -34,5 +35,6 @@ app.use('/', customerRoutes);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(app.get('port'), () => {
-  console.log('Server on port 3000' );
+  console.log('Server on port', app.get('port'));
 });
+app.use(express.static('/public')) // o el nombre de la carpeta donde guardaste scripts.js

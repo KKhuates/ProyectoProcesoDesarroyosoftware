@@ -1,27 +1,83 @@
+
 <!DOCTYPE html>
 <html>
 <head>
   <title>Admin Page</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+    }
+    
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      background-color: #f2f2f2;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #d9d9d9;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr.seleccionado {
+        background-color: #FFD700;  /* Cambia el color al que prefieras */
+    }
+  </style>
 </head>
 <body>
   <h1>Página de administración</h1>
-  <table>
+  <table id="tablaUsuarios">
     <tr>
-      <th>Usuario</th>
+      <th>Nombre Estudiante</th>
       <th>Correo</th>
       <th>RUT</th>
       <th>Archivo de consultoría</th>
-      <!-- Aquí puedes agregar los demás campos que desees mostrar -->
+      <th>Fecha subida archivo</th>
+      <th>Nota</th>
     </tr>
     <% usuariosConsultorias.forEach(function(usuarioConsultoria) { %>
       <tr>
-        <td><%= usuarioConsultoria.nombre %></td>
-        <td><%= usuarioConsultoria.correo_electronico %></td>
-        <td><%= usuarioConsultoria.rut %></td>
-        <td><%= usuarioConsultoria.nombre_archivo %></td>
-        <!-- Aquí puedes agregar los demás campos que desees mostrar -->
+        <td><%= usuarioConsultoria.usuario.nombre %></td>
+        <td><%= usuarioConsultoria.usuario.correo_electronico %></td>
+        <td><%= usuarioConsultoria.usuario.rut %></td>
+        <% if(usuarioConsultoria.consultoria) { %>
+          <td><%= usuarioConsultoria.consultoria.nombre_archivo %></td>
+          <td><%= usuarioConsultoria.consultoria.fecha_subida_archivo %></td>
+        <% } else { %>
+          <td>No disponible</td>
+          <td>No disponible</td>
+        <% } %>
+        <% if(usuarioConsultoria.notas) { %>
+          <td><%= usuarioConsultoria.notas.nota %></td>
+        <% } else { %>
+          <td>No disponible</td>
+        <% } %>
       </tr>
     <% }); %>
+    
   </table>
+  <button id="crudUsuario" disabled>CRUD Usuario</button>
+  <button id="crudConsulta" disabled>CRUD Consulta</button>
+  <script src="scripts.js"></script>
 </body>
 </html>
