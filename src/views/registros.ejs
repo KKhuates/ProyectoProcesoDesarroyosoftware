@@ -1,74 +1,34 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Registro de usuario</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: "Times New Roman", sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f3f3f3;
-    }
-    
-    .container {
-      width: 300px;
-      padding: 16px;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
+<!-- registro.ejs -->
 
-    .container input[type="text"],
-    .container input[type="email"],
-    .container input[type="password"] {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .container input[type="submit"] {
-      width: 100%;
-      padding: 8px;
-      color: #fff;
-      background-color: #4285F4;
-      border: none;
-      border-radius: 4px;
-    }
-
-    .back-button {
-      display: block;
-      margin-top: 10px;
-      text-align: center;
-      text-decoration: none;
-      background-color: #4285F4;
-      color: white;
-      padding: 8px;
-      border-radius: 4px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Registro de usuario</h2>
-    <form action="/registros" method="post">
-      <label for="nombre">Nombre:</label>
-      <input type="text" id="nombre" name="nombre" required><br><br>
-      <label for="correo">Correo electrónico:</label>
-      <input type="email" id="correo" name="correo" required><br><br>
-      <label for="rut_reg">RUT:</label>
-      <input type="text" id="rut_reg" name="rut_reg" required><br><br>
-      <label for="dv_rut">Dígito verificador:</label>
-      <input type="text" id="dv_rut" name="dv_rut" required><br><br>
-      <label for="password_reg">Contraseña:</label>
-      <input type="password" id="password_reg" name="password_reg" required><br><br>
-      <input type="submit" value="Registrar">
-    </form>
-    <a href="/" class="back-button">Atrás</a>
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+      <form class="mt-5" action="/registro" method="POST">
+          <div class="form-group">
+              <input type="text" class="form-control" name="nombre" placeholder="Nombre" required>
+          </div>
+          <div class="form-group">
+              <input type="email" class="form-control" name="correo" placeholder="Correo" required>
+          </div>
+          <div class="form-group">
+              <input type="number" class="form-control" name="rut" placeholder="Rut" required>
+          </div>
+          <div class="form-group">
+              <input type="text" class="form-control" name="dv" placeholder="Digito Verificador" required>
+          </div>
+          <div class="form-group">
+              <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
+          </div>
+          <div class="form-group">
+            <select class="form-control" name="tipo_usuario" required>
+                <option value="">Selecciona un tipo de usuario</option>
+                <option value="1">Estudiante</option>
+                <option value="2">Administrador</option>
+                <option value="3">Comite</option>
+            </select>
+        </div>
+          <div class="form-group text-center">
+              <input type="submit" class="btn btn-primary" value="Registrarse">
+          </div>
+      </form>
   </div>
-</body>
-</html>
+</div>

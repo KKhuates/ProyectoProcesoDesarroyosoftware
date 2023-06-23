@@ -1,17 +1,14 @@
+// customer.js
+
 const express = require('express');
 const router = express.Router();
-const customerController = require('../controladores/customerController');
-const { upload } = require('../controladores/customerController');
 
-router.get('/', customerController.mostrarInicio);
-router.get('/menuprincipal', customerController.mostrarMenuPrincipal);
-router.get('/paginaerror', customerController.paginaError);
-router.get('/login', customerController.iniciarSesion);
-router.get('/registros', customerController.registrarUsuario);
-router.get('/subir_consultoria', customerController.mostrarFormularioSubirConsultoria);
+const customerController = require('mysql/CRUD-ND-MYSQL/src/controlador/customerController');
+router.get('/inicio_admin', customerController.inicio_admin_get);
+router.get('/login', customerController.login_get);
+router.get('/registros',customerController.registro_get);
 
-router.post('/login', customerController.iniciarSesion);
-router.post('/registros', customerController.registrarUsuario);
-router.post('/subir_consultoria', upload.single('file'), customerController.mostrarFormularioSubirConsultoria);
+router.post('/registro', customerController.registro_post);
+router.post('/login', customerController.login_post);
 
 module.exports = router;

@@ -3,46 +3,16 @@
 <head>
   <title>Inicio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: "Arial", sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f3f3f3;
-    }
-    
-    .container {
-      text-align: center;
-    }
-
-    .logo {
-      width: auto;
-      max-width: 200px;
-      height: auto;
-      display: block;
-      margin: 0 auto 20px;
-    }
-
-    .button {
-      display: inline-block;
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      text-decoration: none;
-      background-color: #4285F4;
-      color: white;
-      border-radius: 5px;
-    }
-  </style>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-  <div class="container">
-    <img src="/CustomLoginLogo.jpg" alt="Logo" class="logo">
-    <a href="/login" class="button">Iniciar sesión</a>
-    <a href="/registros" class="button">Registro</a>
+  <div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="text-center">
+      <img src="/CustomLoginLogo.jpg" alt="Logo" class="img-fluid" style="max-width: 200px;">
+      <br>
+      <a href="login" class="btn btn-primary mt-3">Iniciar sesión</a>
+      <a href="registros" class="btn btn-primary">Ingresar nuevo usuario</a>
+    </div>
   </div>
 </body>
 </html>

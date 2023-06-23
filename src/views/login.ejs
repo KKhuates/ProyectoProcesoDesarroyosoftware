@@ -1,71 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Iniciar sesión</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: "Times New Roman", sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f3f3f3;
-    }
-    
-    .container {
-      text-align: center;
-    }
-    
-    .form {
-      display: inline-block;
-      background-color: white;
-      padding: 20px;
-      border-radius: 5px;
-      text-align: left;
-      width: 300px;
-    }
-    
-    .button,
-    .submit-button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      text-decoration: none;
-      background-color: #4285F4;
-      color: white;
-      border-radius: 5px;
-      border: none;
-    }
+<!-- login.ejs -->
 
-    .back-button {
-      display: block;
-      margin: 10px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      text-decoration: none;
-      background-color: #4285F4;
-      color: white;
-      border-radius: 5px;
-      border: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="form">
-      <h2>Iniciar sesión</h2>
-      <form action="/login" method="post">
-        <label for="username">Nombre de usuario:</label><br>
-        <input type="text" id="rut" name="rut_reg" required><br><br>
-        <label for="password">Contraseña:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" class="submit-button" value="Iniciar sesión">
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+      <form class="mt-5" action="/login" method="POST">
+          <div class="form-group">
+              <label for="rut">RUT</label>
+              <input type="text" class="form-control" id="rut" name="rut" required>
+          </div>
+          <div class="form-group">
+              <label for="password">Contraseña</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Iniciar sesión</button>
       </form>
-    </div>
-    <a href="/" class="back-button">Atrás</a>
   </div>
-</body>
-</html>
+</div>
