@@ -10,18 +10,20 @@ const expressLayouts = require('express-ejs-layouts');
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 
-// Importar rutas
-const customerRoutes = require('./rutas/customer'); // Asegúrate de que esta ruta es correcta
-
+app.use(express.urlencoded({ extended: true }));
 app.use(session({
-  secret: 'your secret key',
+  secret: 'pds',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false } // Recuerda configurar esto a true si estás en un entorno de producción con HTTPS habilitado
 }));
+// Importar rutas
+const customerRoutes = require('./rutas/customer'); // Asegúrate de que esta ruta es correcta
+app.use('/', customerRoutes);
+
+
 // Configuración del puerto
 app.set('port', process.env.PORT || 3000);
-app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middlewares
@@ -38,12 +40,9 @@ const dbOptions = {
 app.use(myConnection(mysql, dbOptions, 'single'));
 app.use(express.urlencoded({ extended: false }));
 
-// Rutas
-app.use('/', customerRoutes);
-
 // Ruta para mostrar la página inicio.ejs
-app.get('/', function(req, res) {
-    res.render('inicio');
+app.get('/', function (req, res) {
+  res.render('inicio', { layout: 'layout' });
 });
 
 // Archivos estáticos

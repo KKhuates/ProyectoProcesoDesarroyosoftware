@@ -21,21 +21,21 @@
     <table id="userTable" class="table table-bordered">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Nombre</th>
+          <th>Correo Electrónico</th>
           <th>RUT</th>
-          <th>ID Consultoria</th>
-          <th>Acciones</th>
+          <th>Opciones</th>
         </tr>
-      </thead>
-      <tbody>
-        <% for(let i=0; i<users.length; i++) { %>
+        <% for (let i = 0; i < users.length; i++) { %>
           <tr>
+            <td><%= users[i].id_usuario %></td>
             <td><%= users[i].nombre %></td>
-            <td><%= users[i].rut %></td>
-            <td><%= users[i].id_consultoria || 'No disponible' %></td>
+            <td><%= users[i].correo_electronico %></td>
+            <td><%= users[i].rut %>-<%= users[i].rut_id %></td>
             <td>
-              <a href="/editUser/<%= users[i].id_usuario %>" class="btn btn-secondary">Editar</a>
-              <a href="/deleteUser/<%= users[i].id_usuario %>" class="btn btn-danger">Eliminar</a>
+              <a href="/borrar_usuario/<%= users[i].id_usuario %>">Borrar</a>
+              <a href="/editar_usuario/<%= users[i].id_usuario %>">Editar</a>
             </td>
           </tr>
         <% } %>
@@ -56,7 +56,7 @@
     var data = {
       labels: ['Aceptadas', 'Rechazadas', 'Analizando'],
       datasets: [{
-        data: [10, 20, 30],
+        data: [1 ,2 ,3 ],
         backgroundColor: ['green', 'red', 'yellow']
       }]
     };
