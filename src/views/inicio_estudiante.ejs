@@ -1,0 +1,31 @@
+<!-- inicio_estudiante.ejs -->
+
+<div class="container">
+    <h2>Mis Consultorías</h2>
+    <% if (consultorias.length > 0) { %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre Archivo</th>
+            <th>Fecha Subida</th>
+            <th>Estado</th>
+            <th>Actualizar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% consultorias.forEach(function(consultoria) { %>
+            <tr>
+              <td><%= consultoria.nombre_archivo %></td>
+              <td><%= consultoria.fecha_subida_archivo %></td>
+              <td><%= consultoria.estado %></td>
+              <td><a href="/actualizar_consultoria/<%= consultoria.id_consultoria %>">Actualizar</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No disponible</p>
+    <% } %>
+    <a href="/cargar_consultoria" class="btn btn-primary">Cargar nueva consulta</a>
+  </div>
+  

@@ -1,0 +1,19 @@
+<div class="container mt-5">
+    <h2>Cargar Consultoría</h2>
+    <form action="/cargar_consultoria" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" class="form-control" name="nombre" required>
+      </div>
+      <div class="form-group">
+        <label>Descripción de la Consultoría</label>
+        <textarea class="form-control" name="descripcion" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Archivo de Consultoría</label>
+        <input type="file" class="form-control-file" name="archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Cargar</button>
+    </form>
+  </div>
+  

@@ -3,6 +3,12 @@ const pool = require('./database');
 const { render } = require('ejs');
 const expressLayouts = require('express-ejs-layouts');
 
+// Función para manejar errores
+function handleError(res, error) {
+  console.error(error);
+  res.render('paginaerror', { error: 'Ha ocurrido un error.' });
+}
+
 exports.registro_get = async (req, res) => {
   res.render('registros', { layout: 'layout' });
 };
@@ -15,25 +21,13 @@ exports.registro_post = async (req, res) => {
 
     // Inserción del usuario
     const newUser = await pool.query(
-      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id) VALUES (?, ?, ?, ?, ?)',
-      [nombre, correo, hashedPassword, rut, dv]
+      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, correo, hashedPassword, rut, dv, tipo_usuario]
     );
-
-    // Obtener el ID del usuario insertado
-    const userId = newUser.insertId;
-
-    // Inserción del tipo de usuario
-    await pool.query('INSERT INTO tipo_usuario (tipo) VALUES (?)', [tipo_usuario]);
-
-    // Obtener el ID del tipo de usuario insertado
-    const tipoUsuarioId = newUser.insertId;
-
-    // Asociar el tipo de usuario con el usuario creado
-    await pool.query('UPDATE usuario SET id_tipo_usuario = ? WHERE id_usuario = ?', [tipoUsuarioId, userId]);
 
     res.render('login', { layout: 'layout' });
   } catch (error) {
-    res.status(400).send(error.message);
+    handleError(res, error);
   }
 };
 
@@ -47,7 +41,7 @@ exports.login_post = function (req, res) {
 
   pool.query('SELECT * FROM usuario WHERE rut = ?', [rut], async function (err, result) {
     if (err) {
-      res.render('paginaerror', { error: 'Ha ocurrido un error en el inicio de sesión.' });
+      handleError(res, err);
       return;
     }
 
@@ -61,7 +55,7 @@ exports.login_post = function (req, res) {
         // Obtener el tipo de usuario
         pool.query('SELECT tipo FROM tipo_usuario WHERE id_tipo_usuario = ?', [user.id_tipo_usuario], function (err, result) {
           if (err) {
-            res.render('paginaerror', { error: 'Ha ocurrido un error en el inicio de sesión.' });
+            handleError(res, err);
             return;
           }
 
@@ -74,36 +68,34 @@ exports.login_post = function (req, res) {
                 res.redirect('/inicio_estudiante');
                 break;
               case 'Administrador':
-                res.redirect('/pagina_admin'); // Corregir la ruta a la página de administrador
+                res.redirect('/inicio_admin');
                 break;
               case 'Comite':
                 res.redirect('/inicio_comite');
                 break;
               default:
-                res.render('paginaerror', { error: 'Tipo de usuario no válido.' });
+                handleError(res, new Error('Tipo de usuario no válido.'));
                 break;
             }
           } else {
-            res.render('paginaerror', { error: 'No se encontró el tipo de usuario.' });
+            handleError(res, new Error('No se encontró el tipo de usuario.'));
           }
         });
       } else {
-        res.render('paginaerror', { error: 'La contraseña no coincide.' });
+        handleError(res, new Error('La contraseña no coincide.'));
       }
     } else {
-      res.render('paginaerror', { error: 'No se encontró el usuario.' });
+      handleError(res, new Error('No se encontró el usuario.'));
     }
   });
 };
-
-
 
 exports.borrar_usuario = function(req, res) {
   const idUsuario = req.params.id;
 
   pool.query('DELETE FROM usuario WHERE id_usuario = ?', [idUsuario], function(err, result) {
     if (err) {
-      res.render('paginaerror', { error: 'Ha ocurrido un error al borrar el usuario.' });
+      handleError(res, err);
       return;
     }
 
@@ -117,7 +109,7 @@ exports.editar_usuario_get = function(req, res) {
 
   pool.query('SELECT * FROM usuario WHERE id_usuario = ?', [idUsuario], function(err, result) {
     if (err) {
-      res.render('paginaerror', { error: 'Ha ocurrido un error al obtener los datos del usuario.' });
+      handleError(res, err);
       return;
     }
 
@@ -142,7 +134,7 @@ exports.editar_usuario_post = async function(req, res) {
     // Actualizar los datos del usuario
     pool.query('UPDATE usuario SET nombre = ?, correo_electronico = ?, password = ?, rut = ?, rut_id = ? WHERE id_usuario = ?', [nombre, correo, hashedPassword, rut, dv, idUsuario], function(err, result) {
       if (err) {
-        res.render('paginaerror', { error: 'Ha ocurrido un error al editar el usuario.' });
+        handleError(res, err);
         return;
       }
 
@@ -150,20 +142,96 @@ exports.editar_usuario_post = async function(req, res) {
       res.redirect('/inicio_admin');
     });
   } catch (error) {
-    res.status(400).send(error.message);
+    handleError(res, error);
   }
 };
 
 exports.inicio_admin_get = function (req, res) {
   pool.query('SELECT * FROM usuario', function (err, result) {
     if (err) {
-      res.render('paginaerror', { error: 'Ha ocurrido un error.' });
+      handleError(res, err);
       return;
     }
 
     // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
     res.render('inicio_admin', { users: result, layout: 'layout' });
   });
+};
+
+exports.inicio_estudiante_get = function(req, res) {
+  const idUsuario = req.session.userId;
+
+  pool.query('SELECT * FROM consultoria WHERE id_usuario = ?', [idUsuario], function(err, result) {
+    if (err) {
+      handleError(res, err);
+      return;
+    }
+
+    // Renderizar la vista inicio_estudiante y proporcionar los datos de las consultorías
+    res.render('inicio_estudiante', { consultorias: result, layout: 'layout' });
+  });
+};
+
+exports.cargar_consultoria_get = function(req, res) {
+  // Renderizar la vista cargar_consultoria
+  res.render('cargar_consultoria', { layout: 'layout' });
+};
+
+exports.cargar_consultoria_post = async (req, res) => {
+  try {
+    const { nombre, descripcion } = req.body;
+    const archivo = req.file;
+
+    if (!archivo) {
+      throw new Error('No se subió ningún archivo.');
+    }
+
+    const documento_archivo = archivo.buffer;
+    const fecha_subida_archivo = new Date();
+    const id_usuario = req.session.userId;
+
+    // Inserción de la consultoría
+    await pool.query(
+      'INSERT INTO consultoria (nombre_archivo, documento_archivo, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
+      [nombre, documento_archivo, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
+    );
+
+    res.redirect('/inicio_estudiante');
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+exports.actualizar_consultoria_get = async (req, res) => {
+  try {
+    const id_consultoria = req.params.id; // Obtener el ID de la consultoría de los parámetros de la ruta
+
+    // Obtener los datos de la consultoría
+    const consultoria = await pool.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria]);
+
+    if (consultoria.length > 0) {
+      res.render('actualizar_consultoria', { consultoria: consultoria[0] }); // Renderizar la vista actualizar_consultoria y proporcionar los datos de la consultoría
+    } else {
+      handleError(res, new Error('No se encontró la consultoría.'));
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+exports.actualizar_consultoria_post = async (req, res) => {
+  try {
+    const id_consultoria = req.params.id; // Obtener el ID de la consultoría de los parámetros de la ruta
+    const { nombre, descripcion } = req.body;
+    const archivo = req.file; // Obtener el archivo subido con multer
+
+    // Actualizar los datos de la consultoría
+    await pool.query('UPDATE consultoria SET nombre_archivo = ?, descripcion = ?, archivo = ? WHERE id_consultoria = ?', [nombre, descripcion, archivo.buffer, id_consultoria]); // Guardar el contenido del archivo en la base de datos
+
+    res.redirect('/inicio_estudiante'); // Redirigir al estudiante a su página de inicio
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 function validarRut(rut, dv) {

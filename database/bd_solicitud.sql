@@ -4,7 +4,6 @@ CREATE TABLE tipo_usuario (
   tipo VARCHAR(255) NOT NULL,
   PRIMARY KEY (id_tipo_usuario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- Insertar los tipos de usuarios
 INSERT INTO tipo_usuario (tipo) VALUES ('Estudiante');
 INSERT INTO tipo_usuario (tipo) VALUES ('Administrador');
