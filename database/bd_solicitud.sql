@@ -38,6 +38,15 @@ CREATE TABLE estado_consultoria (
   estado VARCHAR(255) NOT NULL,
   PRIMARY KEY (id_estado_consultoria)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO estado_consultoria (estado) VALUES ('Analizando');
+INSERT INTO estado_consultoria (estado) VALUES ('Rechazado');
+INSERT INTO estado_consultoria (estado) VALUES ('Aceptado');
+
+SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count 
+FROM consultoria 
+INNER JOIN estado_consultoria 
+ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria 
+GROUP BY estado_consultoria.estado
 
 -- Creación de la tabla notas
 CREATE TABLE notas (
@@ -51,6 +60,7 @@ CREATE TABLE consultoria (
   id_consultoria INT(11) NOT NULL AUTO_INCREMENT,
   nombre_archivo VARCHAR(255) NOT NULL,
   documento_archivo LONGBLOB NOT NULL,
+  descripcion VARCHAR(255) NOT NULL,
   fecha_subida_archivo DATETIME NOT NULL,
   id_usuario INT(11) NOT NULL,
   id_evaluador INT(11) DEFAULT NULL,

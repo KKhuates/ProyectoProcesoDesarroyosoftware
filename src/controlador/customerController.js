@@ -2,12 +2,65 @@ const bcrypt = require('bcrypt');
 const pool = require('./database');
 const { render } = require('ejs');
 const expressLayouts = require('express-ejs-layouts');
-
+const multer = require('multer');
+const upload = multer();
 // Función para manejar errores
 function handleError(res, error) {
   console.error(error);
   res.render('paginaerror', { error: 'Ha ocurrido un error.' });
 }
+
+exports.cargar_consultoria_post = async (req, res) => {
+  try {
+    const { nombre, descripcion } = req.body;
+    const archivo = req.file;
+
+    if (!archivo) {
+      throw new Error('No se subió ningún archivo.');
+    }
+
+    const documento_archivo = archivo.buffer;
+    const fecha_subida_archivo = new Date();
+    const id_usuario = req.session.userId;
+    
+    // Inserción de la consultoría
+    await pool.query(
+      'INSERT INTO consultoria (nombre_archivo, documento_archivo, descripcion, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?,?, ?, ?, ?)',
+      [nombre, documento_archivo,descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
+      );
+
+    res.redirect('/inicio_estudiante');
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+exports.registro_admin_get = async (req, res) => {
+  res.render('registrar_admin', { layout: 'layout' });
+};
+
+exports.registro_admin_post = async (req, res) => {
+  try {
+    const { nombre, correo, rut, dv, password, tipo_usuario } = req.body;
+
+    let hashedPassword = await bcrypt.hash(password, 10);
+
+    // Inserción del usuario
+    const newUser = await pool.query(
+      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, correo, hashedPassword, rut, dv, tipo_usuario]
+    );
+
+    // Obtener la lista de usuarios
+    const users = await pool.query('SELECT * FROM usuario');
+
+    // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
+    res.render('inicio_admin', { users: users, layout: 'layout' });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 
 exports.registro_get = async (req, res) => {
   res.render('registros', { layout: 'layout' });
@@ -153,15 +206,35 @@ exports.inicio_admin_get = function (req, res) {
       return;
     }
 
-    // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
-    res.render('inicio_admin', { users: result, layout: 'layout' });
+    let labels = '';
+    let data = '';
+    let message;
+
+    pool.query('SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count FROM consultoria INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria GROUP BY estado_consultoria.estado', function(err, chartResult) {
+      if (err) {
+        handleError(res, err);
+        return;
+      }
+
+      if (chartResult.length === 0) {
+        message = 'No se ha subido ninguna consultoria';
+      } else {
+        // Convertir los datos del gráfico a cadenas para usar en la plantilla EJS
+        labels = chartResult.map(row => row.estado).join("','");
+        data = chartResult.map(row => row.count).join(',');
+      }
+
+      // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
+      res.render('inicio_admin', { users: result, labels: labels, data: data, message: message, layout: 'layout' });
+    });
   });
 };
+
 
 exports.inicio_estudiante_get = function(req, res) {
   const idUsuario = req.session.userId;
 
-  pool.query('SELECT * FROM consultoria WHERE id_usuario = ?', [idUsuario], function(err, result) {
+  pool.query('SELECT consultoria.*, estado_consultoria.estado AS estado FROM consultoria INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria WHERE consultoria.id_usuario = ?', [idUsuario], function(err, result) {
     if (err) {
       handleError(res, err);
       return;
@@ -171,6 +244,7 @@ exports.inicio_estudiante_get = function(req, res) {
     res.render('inicio_estudiante', { consultorias: result, layout: 'layout' });
   });
 };
+
 
 exports.cargar_consultoria_get = function(req, res) {
   // Renderizar la vista cargar_consultoria
@@ -192,15 +266,18 @@ exports.cargar_consultoria_post = async (req, res) => {
 
     // Inserción de la consultoría
     await pool.query(
-      'INSERT INTO consultoria (nombre_archivo, documento_archivo, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
-      [nombre, documento_archivo, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
+      'INSERT INTO consultoria (nombre_archivo, documento_archivo, descripcion, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?, ?)',
+      [nombre, documento_archivo, descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
     );
 
+    req.flash('success', 'Archivo cargado correctamente');
     res.redirect('/inicio_estudiante');
   } catch (error) {
-    handleError(res, error);
+    req.flash('error', 'Error al cargar el archivo');
+    res.redirect('/cargar_consultoria');
   }
 };
+
 
 exports.actualizar_consultoria_get = async (req, res) => {
   try {

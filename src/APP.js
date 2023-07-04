@@ -6,21 +6,26 @@ const mysql = require('mysql');
 const myConnection = require('express-myconnection');
 const app = express();
 const expressLayouts = require('express-ejs-layouts');
+const flash = require('connect-flash');
 
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 
 app.use(express.urlencoded({ extended: true }));
+
+// Configuración de la sesión
 app.use(session({
   secret: 'pds',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false } // Recuerda configurar esto a true si estás en un entorno de producción con HTTPS habilitado
 }));
+
+app.use(flash()); // Esto debe venir después de la configuración de la sesión
+
 // Importar rutas
 const customerRoutes = require('./rutas/customer'); // Asegúrate de que esta ruta es correcta
 app.use('/', customerRoutes);
-
 
 // Configuración del puerto
 app.set('port', process.env.PORT || 3000);

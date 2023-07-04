@@ -8,6 +8,18 @@
 </head>
 <body>
   <div class="container">
+    <% if (messages.error) { %>
+      <div class="alert alert-danger">
+        <%= messages.error %>
+      </div>
+    <% } %>
+    
+    <% if (messages.success) { %>
+      <div class="alert alert-success">
+        <%= messages.success %>
+      </div>
+    <% } %>
+
     <h1 class="my-4 text-center">Inicio Administrador</h1>
 
     <div class="mb-4">
@@ -42,31 +54,42 @@
       </tbody>
     </table>
 
-    <div class="my-4">
-      <canvas id="chart"></canvas>
+    <% if (typeof message !== 'undefined') { %>
+      <div class="my-4 text-center">
+        <h2><%= message %></h2>
+      </div>
+    <% } else { %>
+      <div class="my-4">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="my-4 text-center">
+        <p>Verde = Aceptado</p>
+        <p>Rojo = Rechazado</p>
+        <p>Azul = Analizando</p>
+      </div>
+    <% } %>
+
+    <div class="mb-4">
+      <a href="/registrar_admin" class="btn btn-primary">Ingresar nuevo usuario</a>
     </div>
-  </div>
-  <div class="mb-4">
-    <a href="/registros" class="btn btn-primary">Ingresar nuevo usuario</a>
-  </div>
-  <script>
-    // Aquí se colocaría el código JavaScript para implementar el buscador
 
-    // Datos de prueba para el gráfico
-    var data = {
-      labels: ['Aceptadas', 'Rechazadas', 'Analizando'],
-      datasets: [{
-        data: [1 ,2 ,3 ],
-        backgroundColor: ['green', 'red', 'yellow']
-      }]
-    };
-
-    // Crear el gráfico
-    var ctx = document.getElementById('chart').getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: data
-    });
-  </script>
+    <script>
+      var data = {
+        labels: ['<%= labels %>'],
+        datasets: [{
+          data: [<%= data %>],
+          backgroundColor: ['green', 'red', 'blue']
+        }]
+      };
+    
+      // Crear el gráfico
+      var ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: data
+      });
+    </script>
+    
+  </div>
 </body>
 </html>
