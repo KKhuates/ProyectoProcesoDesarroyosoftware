@@ -19,6 +19,9 @@
                 <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
             </div>
             <div class="form-group">
+                <input type="text" class="form-control" name="empresa" placeholder="Empresa" required>
+            </div>
+            <div class="form-group">
               <select class="form-control" name="tipo_usuario" required>
                   <option value="">Selecciona un tipo de usuario</option>
                   <option value="1">Estudiante</option>
@@ -29,7 +32,29 @@
             <div class="form-group text-center">
                 <input type="submit" class="btn btn-primary" value="Registrarse">
             </div>
-        </form>
+            <div>
+                <label>Nombre empresa</label>
+                <input type="text" name="nombre_empresa" required>
+              </div>
+              <div>
+                <label>Correo empresa</label>
+                <input type="email" name="correo_electronico_empresa" required>
+              </div>
+              <div>
+                <label>Dirección Empresa</label>
+                <input type="text" name="direccion" required>
+              </div>
+              <div>
+                <label>Rubro Empresa</label>
+                <input type="text" name="rubro" required>
+              </div>
+              <div>
+                <label>Teléfono de contacto</label>
+                <input type="text" name="telefono" required>
+              </div>
+            
+              <button type="submit">Registrar</button>
+            </form>
     </div>
   </div>
   

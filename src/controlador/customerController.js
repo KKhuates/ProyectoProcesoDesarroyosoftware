@@ -1,9 +1,5 @@
 const bcrypt = require('bcrypt');
 const pool = require('./database');
-const { render } = require('ejs');
-const expressLayouts = require('express-ejs-layouts');
-const multer = require('multer');
-const upload = multer();
 // Función para manejar errores
 function handleError(res, error) {
   console.error(error);
@@ -38,18 +34,40 @@ exports.cargar_consultoria_post = async (req, res) => {
 exports.registro_admin_get = async (req, res) => {
   res.render('registrar_admin', { layout: 'layout' });
 };
-
+//registros que se deben modificar para que se guarden en la tabla evaluador si es evaluador
 exports.registro_admin_post = async (req, res) => {
   try {
-    const { nombre, correo, rut, dv, password, tipo_usuario } = req.body;
+    const { nombre, correo, rut, dv, password, tipo_usuario, nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono } = req.body;
 
     let hashedPassword = await bcrypt.hash(password, 10);
 
+    // Inserción de la empresa
+    const newCompany = await pool.query(
+      'INSERT INTO empresa (nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono) VALUES (?, ?, ?, ?, ?)',
+      [nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono]
+    );
+
+    const id_empresa = newCompany.insertId;
+
+    let id_evaluador = null;
+
+    // Si el usuario es un evaluador, inserta en la tabla de evaluadores
+    if (tipo_usuario === 'Evaluador') {
+      const newEvaluator = await pool.query(
+        'INSERT INTO evaluador (nombre, correo_evaluador) VALUES (?, ?)',
+        [nombre, correo]
+      );
+      id_evaluador = newEvaluator.insertId;
+    }
+
     // Inserción del usuario
     const newUser = await pool.query(
-      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario) VALUES (?, ?, ?, ?, ?, ?)',
-      [nombre, correo, hashedPassword, rut, dv, tipo_usuario]
+      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa, id_evaluador) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [nombre, correo, hashedPassword, rut, dv, tipo_usuario, id_empresa, id_evaluador]
     );
+
+    // Incrementa el valor de cant_solicitud en la tabla consultoria en 1
+    await pool.query('UPDATE consultoria SET cant_solicitud = cant_solicitud + 1');
 
     // Obtener la lista de usuarios
     const users = await pool.query('SELECT * FROM usuario');
@@ -62,6 +80,7 @@ exports.registro_admin_post = async (req, res) => {
 };
 
 
+//registros se deben eliminar
 exports.registro_get = async (req, res) => {
   res.render('registros', { layout: 'layout' });
 };
@@ -83,7 +102,7 @@ exports.registro_post = async (req, res) => {
     handleError(res, error);
   }
 };
-
+//hasta aca
 
 exports.login_get = function (req, res) {
   res.render('login', { layout: 'layout' });
@@ -265,9 +284,18 @@ exports.cargar_consultoria_post = async (req, res) => {
     const id_usuario = req.session.userId;
 
     // Inserción de la consultoría
+    const result = await pool.query(
+      'INSERT INTO consultoria (nombre_archivo, descripcion, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
+      [nombre, descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
+    );
+
+    // Aquí asumimos que result.insertId contiene el ID de la fila recién insertada
+    const id_consultoria = result.insertId;
+
+    // Inserción del archivo en la tabla archivoSolicitud
     await pool.query(
-      'INSERT INTO consultoria (nombre_archivo, documento_archivo, descripcion, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?, ?)',
-      [nombre, documento_archivo, descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
+      'INSERT INTO archivoSolicitud (archivo, id_consultoria) VALUES (?, ?)',
+      [documento_archivo, id_consultoria]
     );
 
     req.flash('success', 'Archivo cargado correctamente');
@@ -277,6 +305,7 @@ exports.cargar_consultoria_post = async (req, res) => {
     res.redirect('/cargar_consultoria');
   }
 };
+
 
 
 exports.actualizar_consultoria_get = async (req, res) => {

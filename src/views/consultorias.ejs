@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Consultorías</title>
+  </head>
+  <body>
+    <h1>Consultorías</h1>
+    <% consultorias.forEach(function(consultoria) { %>
+      <div>
+        <h2><%= consultoria.title %></h2>
+        <p><%= consultoria.description %></p>
+      </div>
+    <% }); %>
+  </body>
+</html>
