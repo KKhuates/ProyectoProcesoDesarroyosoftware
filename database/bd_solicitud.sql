@@ -73,11 +73,11 @@ CREATE TABLE consultoria (
   id_archivos INT(11) NOT NULL,
   id_notas INT(11) NOT NULL,
   id_estado_consultoria INT(11) NOT NULL,
-  PRIMARYKEY (id_consultoria),
+  PRIMARY KEY (id_consultoria),
   FOREIGN KEY (id_estado_consultoria) REFERENCES estado_consultoria(id_estado_consultoria),
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
   FOREIGN KEY (id_evaluador) REFERENCES evaluador(id_evaluador),
-  FOREIGN KEY (id_archivos) REFERENCES archivoSolicitud(id_archivos),
+  FOREIGN KEY (id_archsivos) REFERENCES archivoSolicitud(id_archivos),
   FOREIGN KEY (id_notas) REFERENCES notas(id_notas)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
