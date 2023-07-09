@@ -6,30 +6,6 @@ function handleError(res, error) {
   res.render('paginaerror', { error: 'Ha ocurrido un error.' });
 }
 
-exports.cargar_consultoria_post = async (req, res) => {
-  try {
-    const { nombre, descripcion } = req.body;
-    const archivo = req.file;
-
-    if (!archivo) {
-      throw new Error('No se subió ningún archivo.');
-    }
-
-    const documento_archivo = archivo.buffer;
-    const fecha_subida_archivo = new Date();
-    const id_usuario = req.session.userId;
-    
-    // Inserción de la consultoría
-    await pool.query(
-      'INSERT INTO consultoria (nombre_archivo, documento_archivo, descripcion, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?,?, ?, ?, ?)',
-      [nombre, documento_archivo,descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
-      );
-
-    res.redirect('/inicio_estudiante');
-  } catch (error) {
-    handleError(res, error);
-  }
-};
 
 exports.registro_admin_get = async (req, res) => {
   res.render('registrar_admin', { layout: 'layout' });
@@ -280,7 +256,7 @@ exports.cargar_consultoria_post = async (req, res) => {
     const documento_archivo = archivo.buffer;
     const fecha_subida_archivo = new Date();
     const id_usuario = req.session.userId;
-
+    
     // Primero, inserta la consultoría
     const resultConsultoria = await pool.query(
       'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
@@ -289,6 +265,7 @@ exports.cargar_consultoria_post = async (req, res) => {
 
     // Luego, obtén el ID de la consultoría insertada
     const id_consultoria = resultConsultoria.insertId;
+    console.log ("id_usuario, id_consultoria-->",id_usuario,id_consultoria);
 
     // Después, inserta el archivo en la tabla archivoSolicitud
     const resultArchivo = await pool.query(
@@ -297,6 +274,7 @@ exports.cargar_consultoria_post = async (req, res) => {
     );
 
     req.flash('success', 'Archivo cargado correctamente');
+    
     res.redirect('/inicio_estudiante');
   } catch (error) {
     console.log("este es el error-->",error)
