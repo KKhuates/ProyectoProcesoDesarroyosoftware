@@ -9,6 +9,13 @@ const app = express();
 const expressLayouts = require('express-ejs-layouts');
 const customerController = require('./controlador/customerController');
 
+// Configuración de la sesión
+app.use(session({
+  secret: 'pds',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // Recuerda configurar esto a true si estás en un entorno de producción con HTTPS habilitado
+}));
 
 // Importar rutas
 const customerRoutes = require('./rutas/customer'); // Asegúrate de que esta ruta es correcta
@@ -21,13 +28,7 @@ app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.use(express.urlencoded({ extended: true }));
 
-// Configuración de la sesión
-app.use(session({
-  secret: 'pds',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false } // Recuerda configurar esto a true si estás en un entorno de producción con HTTPS habilitado
-}));
+
 
 // Configuración de Flash y Middlewares
 app.use(flash());
@@ -47,7 +48,6 @@ const dbOptions = {
   database: 'bd_solicitud'
 };
 app.use(myConnection(mysql, dbOptions, 'single'));
-app.use(express.urlencoded({ extended: false }));
 
 // Rutas
 app.use('/', customerRoutes);

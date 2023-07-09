@@ -13,104 +13,55 @@ exports.registro_admin_get = async (req, res) => {
 
 exports.registro_admin_post = async (req, res) => {
   try {
-    const { nombre, correo, rut, dv, password, tipo_usuario, nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono } = req.body;
-
+    const { nombre, correo_electronico, rut, rut_id, password, id_tipo_usuario, nombre_empresa, direccion, rubro } = req.body;
     let hashedPassword = await bcrypt.hash(password, 10);
-
-    // Inserción de la empresa
+    
     const newCompany = await pool.query(
-      'INSERT INTO empresa (nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono) VALUES (?, ?, ?, ?, ?)',
-      [nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono]
+      'INSERT INTO empresas (nombre, direccion, rubro) VALUES (?, ?, ?)',
+      [nombre_empresa, direccion, rubro]
     );
-
     const id_empresa = newCompany.insertId;
-
+    
     let id_evaluador = null;
-
-    // Si el usuario es un evaluador, inserta en la tabla de evaluadores
-    if (tipo_usuario === 'Evaluador') {
+    if (id_tipo_usuario === 2) {
       const newEvaluator = await pool.query(
         'INSERT INTO evaluador (nombre, correo_evaluador) VALUES (?, ?)',
-        [nombre, correo]
+        [nombre, correo_electronico]
       );
       id_evaluador = newEvaluator.insertId;
     }
 
-    // Inserción del usuario
     const newUser = await pool.query(
-      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa, id_evaluador) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [nombre, correo, hashedPassword, rut, dv, tipo_usuario, id_empresa, id_evaluador]
+      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, id_empresa]
     );
-
-    // Incrementa el valor de cant_solicitud en la tabla consultoria en 1
     await pool.query('UPDATE consultoria SET cant_solicitud = cant_solicitud + 1');
-
-    // Obtener la lista de usuarios
     const users = await pool.query('SELECT * FROM usuario');
-
-    // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
-    res.render('inicio_admin', { users: users, layout: 'layout' });
+    res.render('login', { users: users, layout: 'layout' });
   } catch (error) {
     handleError(res, error);
   }
-};
-
-
-//registros se deben eliminar
-exports.registro_get = async (req, res) => {
-  res.render('registros', { layout: 'layout' });
-};
-
-exports.registro_post = async (req, res) => {
-  try {
-    const { nombre, correo, rut, dv, password, tipo_usuario } = req.body;
-
-    let hashedPassword = await bcrypt.hash(password, 10);
-
-    // Inserción del usuario
-    const newUser = await pool.query(
-      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario) VALUES (?, ?, ?, ?, ?, ?)',
-      [nombre, correo, hashedPassword, rut, dv, tipo_usuario]
-    );
-
-    res.render('login', { layout: 'layout' });
-  } catch (error) {
-    handleError(res, error);
-  }
-};
-//hasta aca
-
-exports.login_get = function (req, res) {
-  res.render('login', { layout: 'layout' });
 };
 
 exports.login_post = function (req, res) {
   const { rut, password } = req.body;
-
   pool.query('SELECT * FROM usuario WHERE rut = ?', [rut], async function (err, result) {
     if (err) {
       handleError(res, err);
       return;
     }
-
     if (result.length > 0) {
       const user = result[0];
-
       const match = await bcrypt.compare(password, user.password);
       if (match) {
         req.session.userId = user.id_usuario; // iniciando sesión
-
-        // Obtener el tipo de usuario
         pool.query('SELECT tipo FROM tipo_usuario WHERE id_tipo_usuario = ?', [user.id_tipo_usuario], function (err, result) {
           if (err) {
             handleError(res, err);
             return;
           }
-
           if (result.length > 0) {
             const tipoUsuario = result[0].tipo;
-            
-            // Redirigir al usuario a su página de inicio correspondiente
             switch (tipoUsuario) {
               case 'Estudiante':
                 res.redirect('/inicio_estudiante');
@@ -137,7 +88,6 @@ exports.login_post = function (req, res) {
     }
   });
 };
-
 exports.borrar_usuario = function(req, res) {
   const idUsuario = req.params.id;
 
@@ -269,8 +219,8 @@ exports.cargar_consultoria_post = async (req, res) => {
 
     // Después, inserta el archivo en la tabla archivoSolicitud
     const resultArchivo = await pool.query(
-      'INSERT INTO archivoSolicitud (id_usuario, archivo, fecha_subida, id_consultoria) VALUES (?, ?, ?, ?)',
-      [id_usuario, documento_archivo, fecha_subida_archivo, id_consultoria]
+      'INSERT INTO archivoSolicitud (id_usuario, archivo, fecha_subida) VALUES (?, ?, ?)',
+      [id_usuario, documento_archivo, fecha_subida_archivo, ]
     );
 
     req.flash('success', 'Archivo cargado correctamente');

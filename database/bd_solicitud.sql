@@ -37,11 +37,9 @@ CREATE TABLE usuario (
   id_tipo_usuario INT(11),
   rut INT(11) DEFAULT NULL,
   rut_id VARCHAR(1) DEFAULT NULL,
-  id_evaluador INT (11) DEFAULT NULL,
   id_empresa INT (11) NOT NULL,
   PRIMARY KEY (id_usuario),
   FOREIGN KEY (id_tipo_usuario) REFERENCES tipo_usuario (id_tipo_usuario),
-  FOREIGN KEY (id_evaluador) REFERENCES evaluador (id_evaluador),
   FOREIGN KEY (id_empresa) REFERENCES empresas (id_empresa)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -56,21 +54,12 @@ INSERT INTO estado_consultoria (estado) VALUES ('Analizando');
 INSERT INTO estado_consultoria (estado) VALUES ('Rechazado');
 INSERT INTO estado_consultoria (estado) VALUES ('Aceptado');
 
--- Creación de la tabla notas
-CREATE TABLE notas (
-  id_notas INT(11) NOT NULL AUTO_INCREMENT,
-  nota VARCHAR(255) NOT NULL,
-  PRIMARY KEY (id_notas)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- Creación de la tabla archivoSolicitud
 CREATE TABLE archivoSolicitud (
   id_archivos INT(11) NOT NULL AUTO_INCREMENT,
-  id_usuario INT(11) NOT NULL,
   archivo LONGBLOB NOT NULL,
   fecha_subida DATETIME NOT NULL,
-  PRIMARY KEY (id_archivos),
-  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+  PRIMARY KEY (id_archivos)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Creación de la tabla consultoria
@@ -82,14 +71,13 @@ CREATE TABLE consultoria (
   id_usuario INT(11) NOT NULL,
   id_evaluador INT(11) DEFAULT NULL,
   id_archivos INT(11) NOT NULL,
-  id_notas INT(11) NOT NULL,
+  nota VARCHAR(255) NOT NULL,
   id_estado_consultoria INT(11) NOT NULL,
   PRIMARY KEY (id_consultoria),
   FOREIGN KEY (id_estado_consultoria) REFERENCES estado_consultoria(id_estado_consultoria),
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
   FOREIGN KEY (id_evaluador) REFERENCES evaluador(id_evaluador),
-  FOREIGN KEY (id_archivos) REFERENCES archivoSolicitud(id_archivos),
-  FOREIGN KEY (id_notas) REFERENCES notas(id_notas)
+  FOREIGN KEY (id_archivos) REFERENCES archivoSolicitud(id_archivos)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- La consulta SELECT para contar consultorías por estado
