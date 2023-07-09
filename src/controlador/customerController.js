@@ -34,7 +34,7 @@ exports.cargar_consultoria_post = async (req, res) => {
 exports.registro_admin_get = async (req, res) => {
   res.render('registrar_admin', { layout: 'layout' });
 };
-//registros que se deben modificar para que se guarden en la tabla evaluador si es evaluador
+
 exports.registro_admin_post = async (req, res) => {
   try {
     const { nombre, correo, rut, dv, password, tipo_usuario, nombre_empresa, correo_electronico_empresa, direccion, rubro, telefono } = req.body;
@@ -227,7 +227,7 @@ exports.inicio_admin_get = function (req, res) {
 
     let labels = '';
     let data = '';
-    let message;
+    let message = {};
 
     pool.query('SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count FROM consultoria INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria GROUP BY estado_consultoria.estado', function(err, chartResult) {
       if (err) {
@@ -236,11 +236,12 @@ exports.inicio_admin_get = function (req, res) {
       }
 
       if (chartResult.length === 0) {
-        message = 'No se ha subido ninguna consultoria';
+        message.error = 'No se ha subido ninguna consultoria';
       } else {
         // Convertir los datos del gráfico a cadenas para usar en la plantilla EJS
         labels = chartResult.map(row => row.estado).join("','");
         data = chartResult.map(row => row.count).join(',');
+        message.success = 'Existen consultorías'; // Aquí agregas tu mensaje de éxito
       }
 
       // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
@@ -248,6 +249,7 @@ exports.inicio_admin_get = function (req, res) {
     });
   });
 };
+
 
 
 exports.inicio_estudiante_get = function(req, res) {
@@ -275,36 +277,35 @@ exports.cargar_consultoria_post = async (req, res) => {
     const { nombre, descripcion } = req.body;
     const archivo = req.file;
 
-    if (!archivo) {
-      throw new Error('No se subió ningún archivo.');
-    }
-
     const documento_archivo = archivo.buffer;
     const fecha_subida_archivo = new Date();
     const id_usuario = req.session.userId;
 
-    // Inserción de la consultoría
-    const result = await pool.query(
-      'INSERT INTO consultoria (nombre_archivo, descripcion, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
+    // Primero, inserta la consultoría
+    const resultConsultoria = await pool.query(
+      'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
       [nombre, descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
     );
 
-    // Aquí asumimos que result.insertId contiene el ID de la fila recién insertada
-    const id_consultoria = result.insertId;
+    // Luego, obtén el ID de la consultoría insertada
+    const id_consultoria = resultConsultoria.insertId;
 
-    // Inserción del archivo en la tabla archivoSolicitud
-    await pool.query(
-      'INSERT INTO archivoSolicitud (archivo, id_consultoria) VALUES (?, ?)',
-      [documento_archivo, id_consultoria]
+    // Después, inserta el archivo en la tabla archivoSolicitud
+    const resultArchivo = await pool.query(
+      'INSERT INTO archivoSolicitud (id_usuario, archivo, fecha_subida, id_consultoria) VALUES (?, ?, ?, ?)',
+      [id_usuario, documento_archivo, fecha_subida_archivo, id_consultoria]
     );
 
     req.flash('success', 'Archivo cargado correctamente');
     res.redirect('/inicio_estudiante');
   } catch (error) {
+    console.log("este es el error-->",error)
     req.flash('error', 'Error al cargar el archivo');
-    res.redirect('/cargar_consultoria');
+    res.redirect('/paginaerror');
+    
   }
 };
+
 
 
 
@@ -338,6 +339,65 @@ exports.actualizar_consultoria_post = async (req, res) => {
   } catch (error) {
     handleError(res, error);
   }
+};
+//Función para visualizar las consultorías
+exports.ver_consultorias_get = async (req, res) => {
+  try {
+    // Selecciona todas las consultorías junto con los datos del archivo correspondiente
+    const consultorias = await pool.query(
+      'SELECT consultoria.nombre_archivo, consultoria.descripcion_archivo, consultoria.fecha_subida_archivo, archivoSolicitud.archivo FROM consultoria AS consultoria INNER JOIN archivoSolicitud AS a ON consultoria.id_archivos = archivoSolicitud.id_archivos'
+    );
+
+    // Comprueba si los datos obtenidos son un array y no están vacíos
+    if (Array.isArray(consultorias) && consultorias.length) {
+      // Renderizar la vista consultorias y proporcionar los datos de las consultorías
+      res.render('consultorias', { consultorias: consultorias, layout: 'layout' });
+    } else {
+      // Renderizar la vista con un mensaje de error o redirigir a una página de error
+      res.status(500).send("No se encontraron datos de consultorías");
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+}
+
+
+
+//Función para evaluar las consultorías
+exports.evaluar_consultoria_post = async (req, res) => {
+  try {
+    const { id_consultoria, nota } = req.body;
+
+    // Determinar el estado de la consultoría basado en la nota
+    let estado;
+    if (nota >= 4) {
+      estado = 3; // Aceptada
+    } else {
+      estado = 2; // Rechazada
+    }
+
+    // Actualizar el estado de la consultoría
+    await pool.query(
+      'UPDATE consultoria SET id_estado_consultoria = ? WHERE id_consultoria = ?',
+      [estado, id_consultoria]
+    );
+
+    // Redirige al usuario a la vista de consultorías
+    res.redirect('/consultorias');
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+exports.logout = function (req,res) {
+  req.session.destroy(function(err) {
+    if (err) {
+      handleError(res, err);
+      return;
+    }
+
+    res.redirect('/login');
+  });
 };
 
 function validarRut(rut, dv) {

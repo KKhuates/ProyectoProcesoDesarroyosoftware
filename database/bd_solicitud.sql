@@ -18,6 +18,15 @@ CREATE TABLE evaluador (
   PRIMARY KEY (id_evaluador)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Agregar tabla empresas
+CREATE TABLE empresas (
+  id_empresa INT (11) NOT NULL AUTO_INCREMENT,
+  nombre VARCHAR(255) NOT NULL,
+  direccion VARCHAR(255) not null,
+  rubro varchar(255) not null, 
+  PRIMARY key (id_empresa)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Creación de la tabla usuario
 CREATE TABLE usuario (
   id_usuario INT(11) NOT NULL AUTO_INCREMENT,
@@ -29,9 +38,11 @@ CREATE TABLE usuario (
   rut INT(11) DEFAULT NULL,
   rut_id VARCHAR(1) DEFAULT NULL,
   id_evaluador INT (11) DEFAULT NULL,
+  id_empresa INT (11) NOT NULL,
   PRIMARY KEY (id_usuario),
   FOREIGN KEY (id_tipo_usuario) REFERENCES tipo_usuario (id_tipo_usuario),
-  FOREIGN KEY (id_evaluador) REFERENCES evaluador (id_evaluador)
+  FOREIGN KEY (id_evaluador) REFERENCES evaluador (id_evaluador),
+  FOREIGN KEY (id_empresa) REFERENCES empresas (id_empresa)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Creación de la tabla estado_consultoria
