@@ -34,22 +34,22 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-router.get('/inicio_admin', customerController.inicio_admin_get);
-router.get('/login', customerController.login_get);
-router.get('/borrar_usuario/:id', customerController.borrar_usuario);
-router.get('/editar_usuario/:id', customerController.editar_usuario_get);
-router.get('/inicio_estudiante', customerController.inicio_estudiante_get);
-router.get('/cargar_consultoria', customerController.cargar_consultoria_get);
-router.get('/actualizar_consultoria/:id', customerController.actualizar_consultoria_get);
-router.get('/registrar_admin',customerController.registro_admin_get);
-router.get('/consultorias', customerController.ver_consultorias_get);
+router.get('/inicio_admin', customerController.inicio_admin_get); //si
+router.get('/login', customerController.login_get); //si
+router.get('/borrar_usuario/:id', customerController.borrar_usuario); //si
+router.get('/editar_usuario/:id', customerController.editar_usuario_get); //si
+router.get('/inicio_estudiante', customerController.inicio_estudiante_get); //si
+router.get('/cargar_consultoria', customerController.cargar_consultoria_get);//SI
+router.get('/actualizar_consultoria/:id', customerController.actualizar_consultoria_get); //si
+router.get('/registrar_admin',customerController.registro_admin_get); //si 
+router.get('/consultorias', customerController.ver_consultorias_get); //Si
 router.get('/logout', customerController.logout);
 
-router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post);
-router.post('/registrar_admin',customerController.registro_admin_post);
-router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post);
-router.post('/actualizar_consultoria/:id', customerController.actualizar_consultoria_post);
-router.post('/editar_usuario/:id', customerController.editar_usuario_post);
-router.post('/login', customerController.login_post);
+router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post); //si
+router.post('/registrar_admin',customerController.registro_admin_post);//si 
+router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post); //si
+router.post('/actualizar_consultoria/:id', customerController.actualizar_consultoria_post); //si
+router.post('/editar_usuario/:id', customerController.editar_usuario_post); //si 
+router.post('/login', customerController.login_post); //si
 
 module.exports = router;

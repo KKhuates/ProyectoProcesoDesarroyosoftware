@@ -11,37 +11,51 @@ exports.registro_admin_get = async (req, res) => {
   res.render('registrar_admin', { layout: 'layout' });
 };
 
-exports.registro_admin_post = async (req, res) => {
-  try {
-    const { nombre, correo_electronico, rut, rut_id, password, id_tipo_usuario, nombre_empresa, direccion, rubro } = req.body;
-    let hashedPassword = await bcrypt.hash(password, 10);
-    
-    const newCompany = await pool.query(
-      'INSERT INTO empresas (nombre, direccion, rubro) VALUES (?, ?, ?)',
-      [nombre_empresa, direccion, rubro]
-    );
-    const id_empresa = newCompany.insertId;
-    
-    let id_evaluador = null;
-    if (id_tipo_usuario === 2) {
-      const newEvaluator = await pool.query(
-        'INSERT INTO evaluador (nombre, correo_evaluador) VALUES (?, ?)',
-        [nombre, correo_electronico]
-      );
-      id_evaluador = newEvaluator.insertId;
+exports.registro_admin_post = (req, res) => {
+  const { nombre, correo_electronico, rut, rut_id, password, id_tipo_usuario, nombre_empresa, direccion, rubro } = req.body;
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      return handleError(res, err);
     }
 
-    const newUser = await pool.query(
-      'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, id_empresa]
+    pool.query(
+      'INSERT INTO empresas (nombre, direccion, rubro) VALUES (?, ?, ?)',
+      [nombre_empresa, direccion, rubro],
+      (err, newCompany) => {
+        if (err) {
+          return handleError(res, err);
+        }
+
+        pool.query('SELECT LAST_INSERT_ID() as id_empresa', (err, results) => {
+          if (err) {
+            return handleError(res, err);
+          }
+
+          const idempresa = results[0].id_empresa;
+          console.log("id_empresa-->", idempresa);
+
+          pool.query(
+            'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, idempresa],
+            (err, newUser) => {
+              if (err) {
+                return handleError(res, err);
+              }
+              console.log("newUser-->", newUser);
+              res.render('login');
+            }
+          );
+        });
+      }
     );
-    await pool.query('UPDATE consultoria SET cant_solicitud = cant_solicitud + 1');
-    const users = await pool.query('SELECT * FROM usuario');
-    res.render('login', { users: users, layout: 'layout' });
-  } catch (error) {
-    handleError(res, error);
-  }
+  });
 };
+
+
+
+exports.login_get =function(req,res){
+  res.render('login', {layout:'layout'});
+}
 
 exports.login_post = function (req, res) {
   const { rut, password } = req.body;
@@ -176,8 +190,6 @@ exports.inicio_admin_get = function (req, res) {
   });
 };
 
-
-
 exports.inicio_estudiante_get = function(req, res) {
   const idUsuario = req.session.userId;
 
@@ -191,7 +203,6 @@ exports.inicio_estudiante_get = function(req, res) {
     res.render('inicio_estudiante', { consultorias: result, layout: 'layout' });
   });
 };
-
 
 exports.cargar_consultoria_get = function(req, res) {
   // Renderizar la vista cargar_consultoria
@@ -234,9 +245,6 @@ exports.cargar_consultoria_post = async (req, res) => {
   }
 };
 
-
-
-
 exports.actualizar_consultoria_get = async (req, res) => {
   try {
     const id_consultoria = req.params.id; // Obtener el ID de la consultoría de los parámetros de la ruta
@@ -268,6 +276,7 @@ exports.actualizar_consultoria_post = async (req, res) => {
     handleError(res, error);
   }
 };
+
 //Función para visualizar las consultorías
 exports.ver_consultorias_get = async (req, res) => {
   try {

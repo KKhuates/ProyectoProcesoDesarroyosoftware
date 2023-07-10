@@ -10,13 +10,6 @@ INSERT INTO tipo_usuario (tipo) VALUES ('Estudiante');
 INSERT INTO tipo_usuario (tipo) VALUES ('Administrador');
 INSERT INTO tipo_usuario (tipo) VALUES ('Comite');
 
--- Creación de la tabla evaluador
-CREATE TABLE evaluador (
-  id_evaluador INT(11) NOT NULL AUTO_INCREMENT,
-  nombre VARCHAR(30) NOT NULL,
-  correo_evaluador VARCHAR(30) DEFAULT NULL,
-  PRIMARY KEY (id_evaluador)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Agregar tabla empresas
 CREATE TABLE empresas (
@@ -69,14 +62,12 @@ CREATE TABLE consultoria (
   descripcion_archivo VARCHAR(255) NOT NULL,
   fecha_subida_archivo DATETIME NOT NULL,
   id_usuario INT(11) NOT NULL,
-  id_evaluador INT(11) DEFAULT NULL,
   id_archivos INT(11) NOT NULL,
   nota VARCHAR(255) NOT NULL,
   id_estado_consultoria INT(11) NOT NULL,
   PRIMARY KEY (id_consultoria),
   FOREIGN KEY (id_estado_consultoria) REFERENCES estado_consultoria(id_estado_consultoria),
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
-  FOREIGN KEY (id_evaluador) REFERENCES evaluador(id_evaluador),
   FOREIGN KEY (id_archivos) REFERENCES archivoSolicitud(id_archivos)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

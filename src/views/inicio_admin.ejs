@@ -39,6 +39,7 @@
           <th>RUT</th>
           <th>Opciones</th>
         </tr>
+        <tbody>
         <% for (let i = 0; i < users.length; i++) { %>
           <tr>
             <td><%= users[i].id_usuario %></td>
@@ -75,12 +76,13 @@
 
     <script>
       var data = {
-        labels: ['<%= labels %>'],
-        datasets: [{
-          data: [<%= data %>],
-          backgroundColor: ['green', 'red', 'blue']
-        }]
-      };
+    labels: ['<%= labels %>'],
+    datasets: [{
+        data: JSON.parse('<%- JSON.stringify(data) %>'),
+        backgroundColor: ['green', 'red', 'blue']
+    }]
+};
+  
     
       // Crear el gráfico
       var ctx = document.getElementById('chart').getContext('2d');
