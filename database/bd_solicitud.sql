@@ -25,7 +25,6 @@ CREATE TABLE usuario (
   id_usuario INT(11) NOT NULL AUTO_INCREMENT,
   nombre VARCHAR(255) NOT NULL,
   correo_electronico VARCHAR(255) NOT NULL,
-  apellido_usuario VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
   id_tipo_usuario INT(11),
   rut INT(11) DEFAULT NULL,
