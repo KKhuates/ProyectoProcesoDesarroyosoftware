@@ -25,33 +25,26 @@ exports.registro_admin_post = (req, res) => {
         if (err) {
           return handleError(res, err);
         }
-
-        pool.query('SELECT LAST_INSERT_ID() as id_empresa', (err, results) => {
-          if (err) {
-            return handleError(res, err);
-          }
-
-          const idempresa = results[0].id_empresa;
-          console.log("id_empresa-->", idempresa);
-
-          pool.query(
-            'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, idempresa],
-            (err, newUser) => {
-              if (err) {
-                return handleError(res, err);
-              }
-              console.log("newUser-->", newUser);
-              res.render('login');
+    
+        const idempresa = newCompany.insertId;
+        console.log("id_empresa-->", idempresa);
+    
+        pool.query(
+          'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, idempresa],
+          (err, newUser) => {
+            if (err) {
+              return handleError(res, err);
             }
-          );
-        });
+            console.log("newUser-->", newUser);
+            res.render('login');
+          }
+        );
       }
     );
+    
   });
 };
-
-
 
 exports.login_get =function(req,res){
   res.render('login', {layout:'layout'});
@@ -209,41 +202,57 @@ exports.cargar_consultoria_get = function(req, res) {
   res.render('cargar_consultoria', { layout: 'layout' });
 };
 
-exports.cargar_consultoria_post = async (req, res) => {
-  try {
-    const { nombre, descripcion } = req.body;
-    const archivo = req.file;
+exports.cargar_consultoria_post = (req, res) => {
+  const { nombre, descripcion } = req.body;
 
-    const documento_archivo = archivo.buffer;
-    const fecha_subida_archivo = new Date();
-    const id_usuario = req.session.userId;
-    
-    // Primero, inserta la consultoría
-    const resultConsultoria = await pool.query(
-      'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_estado_consultoria) VALUES (?, ?, ?, ?, ?)',
-      [nombre, descripcion, fecha_subida_archivo, id_usuario, 1] // 1 es el estado 'ANALISANDO'
-    );
-
-    // Luego, obtén el ID de la consultoría insertada
-    const id_consultoria = resultConsultoria.insertId;
-    console.log ("id_usuario, id_consultoria-->",id_usuario,id_consultoria);
-
-    // Después, inserta el archivo en la tabla archivoSolicitud
-    const resultArchivo = await pool.query(
-      'INSERT INTO archivoSolicitud (id_usuario, archivo, fecha_subida) VALUES (?, ?, ?)',
-      [id_usuario, documento_archivo, fecha_subida_archivo, ]
-    );
-
-    req.flash('success', 'Archivo cargado correctamente');
-    
-    res.redirect('/inicio_estudiante');
-  } catch (error) {
-    console.log("este es el error-->",error)
-    req.flash('error', 'Error al cargar el archivo');
-    res.redirect('/paginaerror');
-    
+  // Verifica si req.file existe y contiene un archivo
+  if (!req.file) {
+    req.flash('error', 'No se cargó ningún archivo');
+    return res.redirect('/paginaerror');
   }
+
+  const archivo = req.file;
+  const documento_archivo = archivo.buffer;
+  const fecha_subida_archivo = new Date();
+  const id_usuario = req.session.userId;
+
+  // Inserta el archivo en la tabla archivoSolicitud
+  pool.query(
+    'INSERT INTO archivoSolicitud (archivo, fecha_subida) VALUES (?, ?)',
+    [documento_archivo, fecha_subida_archivo],
+    (err, newFile) => {
+      if (err) {
+        console.log(err);
+        req.flash('error', 'Error al cargar el archivo');
+        return res.redirect('/paginaerror');
+      }
+  
+      const idarchivos = newFile.insertId;
+      console.log("id_archivo-->", idarchivos);
+  
+      // Inserta la consultoría
+      pool.query(
+        'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_archivos, id_estado_consultoria) VALUES (?, ?, ?, ?, ?, ?)',
+        [nombre, descripcion, fecha_subida_archivo, id_usuario, idarchivos, 1], // 1 es el estado 'ANALISANDO'
+        (err, newConsultoria) => {
+          if (err) {
+            console.log(err);
+            req.flash('error', 'Error al cargar el archivo');
+            return res.redirect('/paginaerror');
+          }
+          
+          const idconsultoria = newConsultoria.insertId;
+          console.log ("id_archivo, id_consultoria-->",idarchivos, idconsultoria);
+  
+          req.flash('success', 'Archivo cargado correctamente');
+          res.redirect('/inicio_estudiante');
+        }
+      );
+    }
+  );
 };
+
+
 
 exports.actualizar_consultoria_get = async (req, res) => {
   try {
@@ -297,8 +306,6 @@ exports.ver_consultorias_get = async (req, res) => {
     handleError(res, error);
   }
 }
-
-
 
 //Función para evaluar las consultorías
 exports.evaluar_consultoria_post = async (req, res) => {
