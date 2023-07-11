@@ -25,10 +25,11 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// Configuración de Express Layouts
+app.set('layout', 'layout'); // Establece 'layout.ejs' como el layout predeterminado
 app.use(expressLayouts);
+
 app.use(express.urlencoded({ extended: true }));
-
-
 
 // Configuración de Flash y Middlewares
 app.use(flash());
@@ -67,4 +68,3 @@ const server = app.listen(app.get('port'), () => {
 });
 
 module.exports.app = app;
-

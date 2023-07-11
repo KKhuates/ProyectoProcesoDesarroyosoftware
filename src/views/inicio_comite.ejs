@@ -1,0 +1,36 @@
+<!-- inicio_comite.ejs -->
+<div class="container">
+    <h2>Consultorías</h2>
+    <a href="/logout" class="btn btn-primary" style="position: absolute; top: 0; right: 0;">Cerrar sesión</a>
+    <% if (consultorias.length > 0) { %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre Archivo</th>
+            <th>Fecha Subida</th>
+            <th>Estado</th>
+            <th>Calificar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% consultorias.forEach(function(consultoria) { %>
+            <tr>
+              <td><%= consultoria.nombre_archivo %></td>
+              <td><%= consultoria.fecha_subida_archivo %></td>
+              <td><%= consultoria.estado %></td>
+              <td>
+                <form action="/calificar_consultoria" method="POST">
+                  <input type="hidden" name="id_consultoria" value="<%= consultoria.id_consultoria %>">
+                  <input type="number" name="calificacion" min="0" max="70">
+                  <button type="submit">Calificar</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>No disponible</p>
+    <% } %>
+  </div>
+  

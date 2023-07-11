@@ -95,6 +95,7 @@ exports.login_post = function (req, res) {
     }
   });
 };
+
 exports.borrar_usuario = function(req, res) {
   const idUsuario = req.params.id;
 
@@ -212,10 +213,13 @@ exports.cargar_consultoria_post = (req, res) => {
   }
 
   const archivo = req.file;
-  const documento_archivo = archivo.buffer;
+  const documento_archivo = archivo.buffer || archivo.path;
+  if (!documento_archivo) {
+    req.flash('error', 'El archivo está vacío');
+    return res.redirect('/paginaerror');
+  }
   const fecha_subida_archivo = new Date();
   const id_usuario = req.session.userId;
-
   // Inserta el archivo en la tabla archivoSolicitud
   pool.query(
     'INSERT INTO archivoSolicitud (archivo, fecha_subida) VALUES (?, ?)',
@@ -251,8 +255,6 @@ exports.cargar_consultoria_post = (req, res) => {
     }
   );
 };
-
-
 
 exports.actualizar_consultoria_get = async (req, res) => {
   try {
@@ -332,6 +334,56 @@ exports.evaluar_consultoria_post = async (req, res) => {
     handleError(res, error);
   }
 };
+
+
+exports.inicio_comite_get = function(req, res, next) {
+  req.getConnection((err, conn) => {
+    if (err) return next(err);
+    conn.query('SELECT consultoria.*, estado_consultoria.estado FROM consultoria LEFT JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria', (err, rows) => {
+      if (err) {
+        console.log(err);
+      }
+      res.render('inicio_comite', { consultorias: rows });
+    });
+  });
+};
+
+
+  exports.calificar_consultoria_post = function(req, res) {
+    const consultoriaId = req.body.consultoriaId;
+    const calificacion = req.body.calificacion;
+
+
+    
+
+    //no guarda la nota !!!!!
+
+
+
+    // Determinar el estado de la consultoría basado en la calificación
+    let estado = 1;
+    if (calificacion >= 40) {
+      estado = 3;
+    } else {
+      estado = 2;
+    }
+
+    // Actualizar la calificación y el estado de la consultoría en la base de datos
+    req.getConnection((err, conn) => {
+      if (err) {
+        return next(err);
+      }
+      conn.query('UPDATE consultoria SET nota = ?, id_estado_consultoria = ? WHERE id_consultoria = ?', [calificacion, estado, consultoriaId], (err, results) => {
+        if (err) {
+          console.log(err);
+        }
+        res.redirect('/inicio_comite');
+      });
+    });
+  };
+
+
+
 
 exports.logout = function (req,res) {
   req.session.destroy(function(err) {
