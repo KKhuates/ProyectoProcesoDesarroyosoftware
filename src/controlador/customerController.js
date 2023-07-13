@@ -319,9 +319,12 @@ exports.evaluar_consultoria_post = async (req, res) => {
     if (nota >= 4) {
       estado = 3; // Aceptada
     } 
-    elif (nota <= 4) {
+    elif (nota <= 4); {
       estado = 2; // Rechazada
     }
+    elif (nota = 0); {
+      estado = 1 //Analizando
+    };
 
     // Actualizar el estado de la consultoría
     await pool.query(
