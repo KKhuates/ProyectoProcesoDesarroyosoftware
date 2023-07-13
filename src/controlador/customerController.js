@@ -307,7 +307,7 @@ exports.actualizar_consultoria_post = (req, res) => {
       const consultoria = results[0];
 
       // Obtener la ruta del archivo existente
-      const existingFilePath = path.join(__dirname, 'ruta/a/los/archivos', consultoria.nombre_archivo);
+      const existingFilePath = path.join(__dirname, '../Uploads', consultoria.nombre_archivo);
 
       // Verificar si el archivo existente existe
       fs.access(existingFilePath, fs.constants.F_OK, (err) => {

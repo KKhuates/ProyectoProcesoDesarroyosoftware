@@ -1,11 +1,10 @@
 <div class="container mt-5">
-    <h2>Actualizar Consultoría</h2>
-    <form action="/actualizar_consultoria/<%= consultoria.id_consultoria %>" method="POST" enctype="multipart/form-data">
-      <div class="form-group">
-        <label>Subir nuevo archivo</label>
-        <input type="file" class="form-control-file" name="archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Actualizar</button>
-    </form>
-  </div>
-  
+  <h2>Actualizar Consultoría</h2>
+  <form action="/actualizar_consultoria/<%= consultoria.id_consultoria %>" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label>Subir nuevo archivo</label>
+      <input type="file" class="form-control-file" name="archivo" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+  </form>
+</div>
