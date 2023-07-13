@@ -39,18 +39,18 @@ router.get('/borrar_usuario/:id', customerController.borrar_usuario); //si
 router.get('/editar_usuario/:id', customerController.editar_usuario_get); //si
 router.get('/inicio_estudiante', customerController.inicio_estudiante_get); //si
 router.get('/cargar_consultoria', customerController.cargar_consultoria_get);//SI
-router.get('/actualizar_consultoria/:id', customerController.actualizar_consultoria_get); //si
 router.get('/registrar_admin',customerController.registro_admin_get); //si 
 router.get('/consultorias', customerController.ver_consultorias_get); //Si
 router.get('/logout', customerController.logout);
 router.get('/inicio_comite', customerController.inicio_comite_get);
+router.get('/actualizar_consultoria/:id', customerController.actualizar_consultoria_get);
 
 
+router.post('/actualizar_consultoria/:id', upload.single('archivo'), customerController.actualizar_consultoria_post);
 router.post('/calificar_consultoria', customerController.calificar_consultoria_post);
 router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post); //si
 router.post('/registrar_admin',customerController.registro_admin_post);//si 
-router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post); //si
-router.post('/actualizar_consultoria/:id', customerController.actualizar_consultoria_post); //si
+router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_get); //si
 router.post('/editar_usuario/:id', customerController.editar_usuario_post); //si 
 router.post('/login', customerController.login_post); //si
 

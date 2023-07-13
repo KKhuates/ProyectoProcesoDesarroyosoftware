@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const pool = require('./database');
-const fs = require('fs');
-const path = require('path');
+const db = require('./database');
+
 // Función para manejar errores
 function handleError(res, error) {
   console.error(error);
@@ -205,149 +205,32 @@ exports.cargar_consultoria_get = function(req, res) {
   res.render('cargar_consultoria', { layout: 'layout' });
 };
 
-exports.cargar_consultoria_post = (req, res) => {
-  const { nombre, descripcion } = req.body;
+exports.actualizar_consultoria_post = (req, res) => {
+  let id = req.params.id;
+  let newFileName = req.file.filename; // Obtén el nombre del archivo subido
 
-  // Verifica si req.file existe y contiene un archivo
-  if (!req.file) {
-    req.flash('error', 'No se cargó ningún archivo');
-    return res.redirect('/paginaerror');
-  }
+  // Actualiza la consultoría en la base de datos
+  // Reemplaza esta consulta SQL de acuerdo a tu esquema de base de datos
+  let sql = `UPDATE consultoria SET nombre_archivo = '${newFileName}' WHERE id_consultoria = ${id}`;
 
-  const archivo = req.file;
-  const documento_archivo = archivo.buffer || archivo.path;
-  if (!documento_archivo) {
-    req.flash('error', 'El archivo está vacío');
-    return res.redirect('/paginaerror');
-  }
-  const fecha_subida_archivo = new Date();
-  const id_usuario = req.session.userId;
-  // Inserta el archivo en la tabla archivoSolicitud
-  pool.query(
-    'INSERT INTO archivoSolicitud (archivo, fecha_subida) VALUES (?, ?)',
-    [documento_archivo, fecha_subida_archivo],
-    (err, newFile) => {
-      if (err) {
-        console.log(err);
-        req.flash('error', 'Error al cargar el archivo');
-        return res.redirect('/paginaerror');
-      }
-  
-      const idarchivos = newFile.insertId;
-      console.log("id_archivo-->", idarchivos);
-  
-      // Inserta la consultoría
-      pool.query(
-        'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_archivos, id_estado_consultoria) VALUES (?, ?, ?, ?, ?, ?)',
-        [nombre, descripcion, fecha_subida_archivo, id_usuario, idarchivos, 1], // 1 es el estado 'ANALISANDO'
-        (err, newConsultoria) => {
-          if (err) {
-            console.log(err);
-            req.flash('error', 'Error al cargar el archivo');
-            return res.redirect('/paginaerror');
-          }
-          
-          const idconsultoria = newConsultoria.insertId;
-          console.log ("id_archivo, id_consultoria-->",idarchivos, idconsultoria);
-  
-          req.flash('success', 'Archivo cargado correctamente');
-          res.redirect('/inicio_estudiante');
-        }
-      );
-    }
-  );
-};
-
-exports.actualizar_consultoria_get = (req, res) => {
-  const id_consultoria = parseInt(req.params.id); // Obtener el ID de la consultoría de los parámetros de la ruta
-
-  // Obtener los datos de la consultoría
-  pool.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria], (error, results, fields) => {
-    if (error) {
-      console.log(error);
-      handleError(res, error);
-      return;
-    }
-
-    console.log('id_consultoria:', id_consultoria);
-    console.log('consultoria:', results);
-
-    // Verificar si la consulta devolvió algún resultado
-    if (results.length > 0) {
-      // Si se encontró la consultoría, renderizar la vista actualizar_consultoria y proporcionar los datos de la consultoría
-      res.render('actualizar_consultoria', { consultoria: results[0] });
-    } else {
-      // Si no se encontró la consultoría, enviar un mensaje de error
-      console.error('No se encontró la consultoría.');
-      res.send('No se encontró la consultoría.');
-    }
+  db.query(sql, (err, result) => {
+    if (err) throw err;
+    res.redirect('/inicio_estudiante');
   });
 };
 
+exports.actualizar_consultoria_get = (req, res) => {
+  let id = req.params.id;
+  
+  // Busca la consultoría con el ID proporcionado en la base de datos
+  // Reemplaza esta consulta SQL de acuerdo a tu esquema de base de datos
+  let sql = `SELECT * FROM consultoria WHERE id_consultoria = ${id}`;
 
-exports.actualizar_consultoria_post = (req, res) => {
-  // Verificar si se subió un archivo
-  if (!req.file) {
-    console.error('No se subió ningún archivo.');
-    res.send('No se subió ningún archivo.');
-    return;
-  }
-
-  const id_consultoria = parseInt(req.params.id);
-
-  // Obtener los datos de la consultoría
-  pool.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria], (error, results) => {
-    if (error) {
-      console.log(error);
-      handleError(res, error);
-      return;
-    }
-
-    if (results.length > 0) {
-      const consultoria = results[0];
-
-      // Obtener la ruta del archivo existente
-      const existingFilePath = path.join(__dirname, '../Uploads', consultoria.nombre_archivo);
-
-      // Verificar si el archivo existente existe
-      fs.access(existingFilePath, fs.constants.F_OK, (err) => {
-        if (!err) {
-          // Si el archivo existe, eliminarlo
-          fs.unlink(existingFilePath, (err) => {
-            if (err) {
-              console.error('Error al eliminar el archivo existente:', err);
-              res.send('Error al eliminar el archivo existente.');
-              return;
-            }
-
-            // Subir el nuevo archivo
-            upload.single('file')(req, res, (uploadError) => {
-              if (uploadError) {
-                console.error('Error al subir el nuevo archivo:', uploadError);
-                res.send('Error al subir el nuevo archivo.');
-              } else {
-                // Aquí puedes agregar el código para actualizar la base de datos con los detalles del nuevo archivo.
-                res.send('Archivo subido y consultoría actualizada exitosamente.');
-              }
-            });
-          });
-        } else {
-          // Si el archivo no existe, simplemente subir el nuevo archivo
-          upload.single('file')(req, res, (uploadError) => {
-            if (uploadError) {
-              console.error('Error al subir el nuevo archivo:', uploadError);
-              res.send('Error al subir el nuevo archivo.');
-            } else {
-              // Aquí puedes agregar el código para actualizar la base de datos con los detalles del nuevo archivo.
-              res.send('Archivo subido y consultoría actualizada exitosamente.');
-            }
-          });
-        }
-      });
-    } else {
-      console.error('No se encontró la consultoría.');
-      res.send('No se encontró la consultoría.');
-    }
+  db.query(sql, (err, result) => {
+    if (err) throw err;
+    
+    // Renderiza la vista actualizar_consultoria.ejs con los detalles de la consultoría
+    res.render('actualizar_consultoria', { consultoria: result[0] });
   });
 };
 
