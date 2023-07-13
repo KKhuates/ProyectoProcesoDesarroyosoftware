@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const pool = require('./database');
+const fs = require('fs');
+const path = require('path');
 // Función para manejar errores
 function handleError(res, error) {
   console.error(error);
@@ -256,37 +258,99 @@ exports.cargar_consultoria_post = (req, res) => {
   );
 };
 
-exports.actualizar_consultoria_get = async (req, res) => {
-  try {
-    const id_consultoria = req.params.id; // Obtener el ID de la consultoría de los parámetros de la ruta
+exports.actualizar_consultoria_get = (req, res) => {
+  const id_consultoria = parseInt(req.params.id); // Obtener el ID de la consultoría de los parámetros de la ruta
 
-    // Obtener los datos de la consultoría
-    const consultoria = await pool.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria]);
-
-    if (consultoria.length > 0) {
-      res.render('actualizar_consultoria', { consultoria: consultoria[0] }); // Renderizar la vista actualizar_consultoria y proporcionar los datos de la consultoría
-    } else {
-      handleError(res, new Error('No se encontró la consultoría.'));
+  // Obtener los datos de la consultoría
+  pool.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria], (error, results, fields) => {
+    if (error) {
+      console.log(error);
+      handleError(res, error);
+      return;
     }
-  } catch (error) {
-    handleError(res, error);
-  }
+
+    console.log('id_consultoria:', id_consultoria);
+    console.log('consultoria:', results);
+
+    // Verificar si la consulta devolvió algún resultado
+    if (results.length > 0) {
+      // Si se encontró la consultoría, renderizar la vista actualizar_consultoria y proporcionar los datos de la consultoría
+      res.render('actualizar_consultoria', { consultoria: results[0] });
+    } else {
+      // Si no se encontró la consultoría, enviar un mensaje de error
+      console.error('No se encontró la consultoría.');
+      res.send('No se encontró la consultoría.');
+    }
+  });
 };
 
-exports.actualizar_consultoria_post = async (req, res) => {
-  try {
-    const id_consultoria = req.params.id; // Obtener el ID de la consultoría de los parámetros de la ruta
-    const { nombre, descripcion } = req.body;
-    const archivo = req.file; // Obtener el archivo subido con multer
 
-    // Actualizar los datos de la consultoría
-    await pool.query('UPDATE consultoria SET nombre_archivo = ?, descripcion = ?, archivo = ? WHERE id_consultoria = ?', [nombre, descripcion, archivo.buffer, id_consultoria]); // Guardar el contenido del archivo en la base de datos
-
-    res.redirect('/inicio_estudiante'); // Redirigir al estudiante a su página de inicio
-  } catch (error) {
-    handleError(res, error);
+exports.actualizar_consultoria_post = (req, res) => {
+  // Verificar si se subió un archivo
+  if (!req.file) {
+    console.error('No se subió ningún archivo.');
+    res.send('No se subió ningún archivo.');
+    return;
   }
+
+  const id_consultoria = parseInt(req.params.id);
+
+  // Obtener los datos de la consultoría
+  pool.query('SELECT * FROM consultoria WHERE id_consultoria = ?', [id_consultoria], (error, results) => {
+    if (error) {
+      console.log(error);
+      handleError(res, error);
+      return;
+    }
+
+    if (results.length > 0) {
+      const consultoria = results[0];
+
+      // Obtener la ruta del archivo existente
+      const existingFilePath = path.join(__dirname, 'ruta/a/los/archivos', consultoria.nombre_archivo);
+
+      // Verificar si el archivo existente existe
+      fs.access(existingFilePath, fs.constants.F_OK, (err) => {
+        if (!err) {
+          // Si el archivo existe, eliminarlo
+          fs.unlink(existingFilePath, (err) => {
+            if (err) {
+              console.error('Error al eliminar el archivo existente:', err);
+              res.send('Error al eliminar el archivo existente.');
+              return;
+            }
+
+            // Subir el nuevo archivo
+            upload.single('file')(req, res, (uploadError) => {
+              if (uploadError) {
+                console.error('Error al subir el nuevo archivo:', uploadError);
+                res.send('Error al subir el nuevo archivo.');
+              } else {
+                // Aquí puedes agregar el código para actualizar la base de datos con los detalles del nuevo archivo.
+                res.send('Archivo subido y consultoría actualizada exitosamente.');
+              }
+            });
+          });
+        } else {
+          // Si el archivo no existe, simplemente subir el nuevo archivo
+          upload.single('file')(req, res, (uploadError) => {
+            if (uploadError) {
+              console.error('Error al subir el nuevo archivo:', uploadError);
+              res.send('Error al subir el nuevo archivo.');
+            } else {
+              // Aquí puedes agregar el código para actualizar la base de datos con los detalles del nuevo archivo.
+              res.send('Archivo subido y consultoría actualizada exitosamente.');
+            }
+          });
+        }
+      });
+    } else {
+      console.error('No se encontró la consultoría.');
+      res.send('No se encontró la consultoría.');
+    }
+  });
 };
+
 
 //Función para visualizar las consultorías
 exports.ver_consultorias_get = async (req, res) => {
