@@ -33,6 +33,8 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
+//GET    
+
 router.get('/inicio_admin', customerController.inicio_admin_get); //si
 router.get('/login', customerController.login_get); //si
 router.get('/borrar_usuario/:id', customerController.borrar_usuario); //si
@@ -45,12 +47,14 @@ router.get('/logout', customerController.logout);
 router.get('/inicio_comite', customerController.inicio_comite_get);
 router.get('/actualizar_consultoria/:id', customerController.actualizar_consultoria_get);
 
+//POSTS
+
 
 router.post('/actualizar_consultoria/:id', upload.single('archivo'), customerController.actualizar_consultoria_post);
 router.post('/calificar_consultoria', customerController.calificar_consultoria_post);
 router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post); //si
 router.post('/registrar_admin',customerController.registro_admin_post);//si 
-router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_get); //si
+router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post ); //si
 router.post('/editar_usuario/:id', customerController.editar_usuario_post); //si 
 router.post('/login', customerController.login_post); //si
 

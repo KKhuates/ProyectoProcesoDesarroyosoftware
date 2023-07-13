@@ -205,6 +205,59 @@ exports.cargar_consultoria_get = function(req, res) {
   res.render('cargar_consultoria', { layout: 'layout' });
 };
 
+exports.cargar_consultoria_post = (req, res) => {
+  const { nombre, descripcion } = req.body;
+
+  // Verifica si req.file existe y contiene un archivo
+  if (!req.file) {
+    req.flash('error', 'No se cargó ningún archivo');
+    return res.redirect('/paginaerror');
+  }
+
+  const archivo = req.file;
+  const documento_archivo = archivo.buffer || archivo.path;
+  if (!documento_archivo) {
+    req.flash('error', 'El archivo está vacío');
+    return res.redirect('/paginaerror');
+  }
+  const fecha_subida_archivo = new Date();
+  const id_usuario = req.session.userId;
+  // Inserta el archivo en la tabla archivoSolicitud
+  pool.query(
+    'INSERT INTO archivoSolicitud (archivo, fecha_subida) VALUES (?, ?)',
+    [documento_archivo, fecha_subida_archivo],
+    (err, newFile) => {
+      if (err) {
+        console.log(err);
+        req.flash('error', 'Error al cargar el archivo');
+        return res.redirect('/paginaerror');
+      }
+  
+      const idarchivos = newFile.insertId;
+      console.log("id_archivo-->", idarchivos);
+  
+      // Inserta la consultoría
+      pool.query(
+        'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_archivos, id_estado_consultoria) VALUES (?, ?, ?, ?, ?, ?)',
+        [nombre, descripcion, fecha_subida_archivo, id_usuario, idarchivos, 1], // 1 es el estado 'ANALISANDO'
+        (err, newConsultoria) => {
+          if (err) {
+            console.log(err);
+            req.flash('error', 'Error al cargar el archivo');
+            return res.redirect('/paginaerror');
+          }
+          
+          const idconsultoria = newConsultoria.insertId;
+          console.log ("id_archivo, id_consultoria-->",idarchivos, idconsultoria);
+  
+          req.flash('success', 'Archivo cargado correctamente');
+          res.redirect('/inicio_estudiante');
+        }
+      );
+    }
+  );
+};
+
 exports.actualizar_consultoria_post = (req, res) => {
   let id = req.params.id;
   let newFileName = req.file.filename; // Obtén el nombre del archivo subido
@@ -265,7 +318,8 @@ exports.evaluar_consultoria_post = async (req, res) => {
     let estado;
     if (nota >= 4) {
       estado = 3; // Aceptada
-    } else {
+    } 
+    elif (nota <= 4) {
       estado = 2; // Rechazada
     }
 
@@ -294,40 +348,6 @@ exports.inicio_comite_get = function(req, res, next) {
     });
   });
 };
-
-
-  exports.calificar_consultoria_post = function(req, res) {
-    const consultoriaId = req.body.consultoriaId;
-    const calificacion = req.body.calificacion;
-
-
-    
-
-    //no guarda la nota !!!!!
-
-
-
-    // Determinar el estado de la consultoría basado en la calificación
-    let estado = 1;
-    if (calificacion >= 40) {
-      estado = 3;
-    } else {
-      estado = 2;
-    }
-
-    // Actualizar la calificación y el estado de la consultoría en la base de datos
-    req.getConnection((err, conn) => {
-      if (err) {
-        return next(err);
-      }
-      conn.query('UPDATE consultoria SET nota = ?, id_estado_consultoria = ? WHERE id_consultoria = ?', [calificacion, estado, consultoriaId], (err, results) => {
-        if (err) {
-          console.log(err);
-        }
-        res.redirect('/inicio_comite');
-      });
-    });
-  };
 
 
 
