@@ -70,8 +70,9 @@ CREATE TABLE consultoria (
   FOREIGN KEY (id_archivos) REFERENCES archivoSolicitud(id_archivos)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- La consulta SELECT para contar consultorías por estado
-SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count 
-FROM consultoria 
-INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria 
-GROUP BY estado_consultoria.estado;
+SELECT estado_consultoria.estado, IFNULL(COUNT(consultoria.id_consultoria), 0) AS count
+FROM estado_consultoria
+LEFT JOIN consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria
+GROUP BY estado_consultoria.estado
+ORDER BY estado_consultoria.estado ASC;
+

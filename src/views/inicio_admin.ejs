@@ -4,7 +4,7 @@
   <title>Inicio Administrador</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <a href="/logout" class="btn btn-primary" style="position: absolute; top: 0; right: 0;">Cerrar sesión</a>
@@ -24,10 +24,6 @@
     <h1 class="my-4 text-center">Inicio Administrador</h1>
 
     <div class="mb-4">
-      <a href="/consultorias" class="btn btn-primary">Consultorias</a>
-    </div>
-
-    <div class="mb-4">
       <input type="text" id="search" class="form-control" placeholder="Buscar...">
     </div>
 
@@ -40,7 +36,8 @@
           <th>RUT</th>
           <th>Opciones</th>
         </tr>
-        <tbody>
+      </thead>
+      <tbody>
         <% for (let i = 0; i < users.length; i++) { %>
           <tr>
             <td><%= users[i].id_usuario %></td>
@@ -56,43 +53,62 @@
       </tbody>
     </table>
 
-    <% if (typeof message !== 'undefined') { %>
-      <div class="my-4 text-center">
-        <h2><%= message %></h2>
-      </div>
-    <% } else { %>
-      <div class="my-4">
-        <canvas id="chart"></canvas>
-      </div>
-      <div class="my-4 text-center">
-        <p>Verde = Aceptado</p>
-        <p>Rojo = Rechazado</p>
-        <p>Azul = Analizando</p>
-      </div>
-    <% } %>
+    <div class="my-4">
+      <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+      // Obtén el contexto del canvas
+      var ctx = document.getElementById('myChart').getContext('2d');
+
+      // Convierte las cadenas de etiquetas y datos en arrays
+      var labels = '<%= labels %>'.split(',');
+      var data = '<%= data %>'.split(',').map(Number);
+
+      // Mapea los estados a los colores
+      var colorMapping = {
+        'Analizando': { backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgba(54, 162, 235, 1)' },
+        'Rechazado': { backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)' },
+        'Aceptado': { backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)' }
+      };
+
+      // Asigna los colores de acuerdo al mapeo
+      var backgroundColors = labels.map(label => colorMapping[label].backgroundColor);
+      var borderColors = labels.map(label => colorMapping[label].borderColor);
+
+      // Crea el gráfico
+      var myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Estados de las consultorías'
+          },
+          animation: {
+            animateScale: true,
+            animateRotate: true
+          }
+        }
+      });
+    </script>
 
     <div class="mb-4">
       <a href="/registrar_admin" class="btn btn-primary">Ingresar nuevo usuario</a>
     </div>
 
-    <script>
-      var data = {
-    labels: ['<%= labels %>'],
-    datasets: [{
-        data: JSON.parse('<%- JSON.stringify(data) %>'),
-        backgroundColor: ['green', 'red', 'blue']
-    }]
-};
-  
-    
-      // Crear el gráfico
-      var ctx = document.getElementById('chart').getContext('2d');
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: data
-      });
-    </script>
-    
   </div>
 </body>
 </html>

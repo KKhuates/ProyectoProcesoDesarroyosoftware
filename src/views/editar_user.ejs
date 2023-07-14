@@ -8,8 +8,14 @@
   <label for="correo">Correo Electrónico:</label>
   <input type="email" name="correo" value="<%= usuario.correo_electronico %>" required>
   <br>
-  <label for="tipo_usuario">Tipo de Usuario:</label>
-  <input type="text" name="tipo_usuario" value="<%= usuario.id_tipo_usuario %>" required>
-  <br>
+  <div class="form-group">
+    <select class="form-control" name="id_tipo_usuario" required>
+        <option value="">Selecciona un tipo de usuario</option>
+        <option value="1">Estudiante</option>
+        <option value="2">Administrador</option>
+        <option value="3">Comite</option>
+    </select>
+</div>
+ 
   <input type="submit" value="Guardar Cambios">
 </form>

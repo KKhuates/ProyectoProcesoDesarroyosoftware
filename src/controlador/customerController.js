@@ -134,13 +134,12 @@ exports.editar_usuario_get = function(req, res) {
 
 exports.editar_usuario_post = async function(req, res) {
   const idUsuario = req.params.id;
-  const { nombre, correo, rut, dv, password } = req.body;
+  const { nombre, correo,id_tipo_usuario} = req.body;
 
   try {
-    let hashedPassword = await bcrypt.hash(password, 10);
 
     // Actualizar los datos del usuario
-    pool.query('UPDATE usuario SET nombre = ?, correo_electronico = ?, password = ?, rut = ?, rut_id = ? WHERE id_usuario = ?', [nombre, correo, hashedPassword, rut, dv, idUsuario], function(err, result) {
+    pool.query('UPDATE usuario SET nombre = ?, correo_electronico = ?, id_tipo_usuario = ? WHERE id_usuario = ?', [nombre, correo, id_tipo_usuario, idUsuario], function(err, result) {
       if (err) {
         handleError(res, err);
         return;
@@ -291,49 +290,48 @@ exports.actualizar_consultoria_get = (req, res) => {
 //Función para visualizar las consultorías
 exports.ver_consultorias_get = async (req, res) => {
   try {
-    // Selecciona todas las consultorías junto con los datos del archivo correspondiente
-    const consultorias = await pool.query(
-      'SELECT consultoria.nombre_archivo, consultoria.descripcion_archivo, consultoria.fecha_subida_archivo, archivoSolicitud.archivo FROM consultoria AS consultoria INNER JOIN archivoSolicitud AS a ON consultoria.id_archivos = archivoSolicitud.id_archivos'
-    );
+    const consultorias = await pool.query('SELECT consultoria.nombre_archivo, consultoria.descripcion_archivo, consultoria.fecha_subida_archivo, archivoSolicitud.archivo FROM consultoria AS consultoria INNER JOIN archivoSolicitud AS a ON consultoria.id_archivos = archivoSolicitud.id_archivos');
 
-    // Comprueba si los datos obtenidos son un array y no están vacíos
+    // Imprime las consultorías obtenidas de la base de datos
+    console.log('consultorias:', consultorias);
+
     if (Array.isArray(consultorias) && consultorias.length) {
-      // Renderizar la vista consultorias y proporcionar los datos de las consultorías
       res.render('consultorias', { consultorias: consultorias, layout: 'layout' });
     } else {
-      // Renderizar la vista con un mensaje de error o redirigir a una página de error
       res.status(500).send("No se encontraron datos de consultorías");
     }
   } catch (error) {
     handleError(res, error);
   }
-}
+};
+
 
 //Función para evaluar las consultorías
 exports.evaluar_consultoria_post = async (req, res) => {
   try {
     const { id_consultoria, nota } = req.body;
 
-    // Determinar el estado de la consultoría basado en la nota
-    let estado;
-    if (nota >= 4) {
-      estado = 3; // Aceptada
-    } 
-    elif (nota <= 4); {
-      estado = 2; // Rechazada
+    // Imprime el id de la consultoría y la nota
+    console.log(`id_consultoria: ${id_consultoria}, nota: ${nota}`);
+
+    let id_estado_consultoria;
+    if (nota >= 40) {
+      id_estado_consultoria = 3;
+    } else if (nota == 0) {
+      id_estado_consultoria = 1;
+    } else {
+      id_estado_consultoria = 2;
     }
-    elif (nota = 0); {
-      estado = 1 //Analizando
-    };
 
-    // Actualizar el estado de la consultoría
-    await pool.query(
-      'UPDATE consultoria SET id_estado_consultoria = ? WHERE id_consultoria = ?',
-      [estado, id_consultoria]
-    );
+    // Imprime el id del estado
+    console.log(`id_estado_consultoria: ${id_estado_consultoria}`);
 
-    // Redirige al usuario a la vista de consultorías
-    res.redirect('/consultorias');
+    await pool.query('UPDATE consultoria SET nota = ?, id_estado_consultoria = ? WHERE id_consultoria = ?', [nota, id_estado_consultoria, id_consultoria]);
+
+    // Imprime un mensaje si la actualización tuvo éxito
+    console.log('La consultoría fue actualizada con éxito');
+
+    res.redirect('/inicio_comite');
   } catch (error) {
     handleError(res, error);
   }
@@ -341,16 +339,36 @@ exports.evaluar_consultoria_post = async (req, res) => {
 
 
 exports.inicio_comite_get = function(req, res, next) {
-  req.getConnection((err, conn) => {
-    if (err) return next(err);
-    conn.query('SELECT consultoria.*, estado_consultoria.estado FROM consultoria LEFT JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria', (err, rows) => {
+  pool.query('SELECT consultoria.*, estado_consultoria.estado FROM consultoria LEFT JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria', (err, rows) => {
+    if (err) {
+      console.log(err);
+    }
+    
+    let labels = '';
+    let data = '';
+    let message = {};
+
+    pool.query('SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count FROM consultoria INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria GROUP BY estado_consultoria.estado', function(err, chartResult) {
       if (err) {
-        console.log(err);
+        handleError(res, err);
+        return;
       }
-      res.render('inicio_comite', { consultorias: rows });
+
+      if (chartResult.length === 0) {
+        message.error = 'No se ha subido ninguna consultoria';
+      } else {
+        // Convertir los datos del gráfico a cadenas para usar en la plantilla EJS
+        labels = chartResult.map(row => row.estado).join("','");
+        data = chartResult.map(row => row.count).join(',');
+        message.success = 'Existen consultorías'; // Aquí agregas tu mensaje de éxito
+      }
+
+      res.render('inicio_comite', { consultorias: rows, labels: labels, data: data, message: message });
     });
   });
 };
+
+
 
 
 
