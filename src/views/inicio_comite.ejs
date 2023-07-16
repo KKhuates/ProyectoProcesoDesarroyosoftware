@@ -45,62 +45,47 @@
     <div class="my-4">
       <canvas id="myChart"></canvas>
     </div>
-    <div>
-      <h2>Verificación de valores</h2>
-      <p>Labels: <%= labels || 'Labels no definidas' %></p>
-      <p>Data: <%= data || 'Data no definida' %></p>
-    </div>
-    
+
     <script>
-      // Obtén el contexto del canvas
+      // Parse the labels and data from the server
+      var labels = JSON.parse('<%- labels %>');  // Convierte la cadena JSON a un array
+      var data = JSON.parse('<%- data %>');  // Convierte la cadena JSON a un array
+  
       var ctx = document.getElementById('myChart').getContext('2d');
-
-      // Convierte las cadenas de etiquetas y datos en arrays
-      var labels = "<%= labels %>".replace(/'/g, '"').split(','); 
-      var data = "<%= data %>".split(',').map(Number); 
-
-
-      // Mapea los estados a los colores
-      var colorMapping = {
-        'Analizando': { backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgba(54, 162, 235, 1)' },
-        'Rechazado': { backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)' },
-        'Aceptado': { backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)' }
-      };
-
-      // Asigna los colores de acuerdo al mapeo
-      var backgroundColors = labels.map(label => colorMapping[label].backgroundColor);
-      var borderColors = labels.map(label => colorMapping[label].borderColor);
-      console.log('Labels:', labels);
-      console.log('Data:', data);
-      // Crea el gráfico
       var myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: labels,
-          datasets: [{
-            data: data,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          legend: {
-            position: 'top',
+          type: 'pie',
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: 'Número de consultorías',
+                  data: data,
+                  backgroundColor: [
+                      'rgba(54, 162, 235, 1)',  // Color azul para 'Analizando'
+                      'rgba(255, 99, 132, 1)',  // Color rojo para 'Rechazado'
+                      'rgba(255, 206, 86, 1)'   // Color amarillo para 'Aceptado'
+                  ],
+                  borderColor: [
+                      'rgba(54, 162, 235, 1)',
+                      'rgba(255, 99, 132, 1)',
+                      'rgba(255, 206, 86, 1)'
+                  ],
+                  borderWidth: 1
+              }]
           },
-          title: {
-            display: true,
-            text: 'Estados de las consultorías'
+          options: {
+              responsive: true,
+              plugins: {
+                  legend: {
+                      position: 'top',
+                  },
+                  title: {
+                      display: true,
+                      text: 'Consultorías por estado'
+                  }
+              }
           },
-          animation: {
-            animateScale: true,
-            animateRotate: true
-          }
-        }
       });
-    </script>
-
+      </script>
   </div>
 </body>
 </html>

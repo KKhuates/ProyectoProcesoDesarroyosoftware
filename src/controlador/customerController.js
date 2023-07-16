@@ -153,8 +153,68 @@ exports.editar_usuario_post = async function(req, res) {
   }
 };
 
+exports.inicio_comite_get = function(req, res, next) {
+  // Realiza la consulta SQL para obtener todas las consultorías y sus estados
+  pool.query('SELECT consultoria.*, estado_consultoria.estado FROM consultoria LEFT JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria', (err, rows) => {
+    if (err) {
+      console.log("Error en la primera consulta SQL:", err);
+      return;
+    }
+    
+    console.log("Resultados de la primera consulta SQL:", rows);
+
+    // Inicializa las variables que se utilizarán para los datos del gráfico
+    let labels = '';
+    let data = '';
+    let message = {};
+
+    // Realiza la consulta SQL para obtener el recuento de consultorías por estado
+    pool.query('SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count FROM consultoria INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria GROUP BY estado_consultoria.estado', function(err, chartResult) {
+      if (err) {
+        console.log("Error en la segunda consulta SQL:", err);
+        return;
+      }
+
+      console.log("Resultados de la segunda consulta SQL:", chartResult);
+
+      // Define todos los estados posibles
+      const allStates = ['Analizando', 'Rechazado', 'Aceptado'];
+
+      // Crea un objeto con todos los estados y sus recuentos
+      const stateCounts = {};
+      allStates.forEach(state => { stateCounts[state] = 0; });
+      chartResult.forEach(row => { stateCounts[row.estado] = row.count; });
+
+      // Convierte los recuentos de estados en las cadenas labels y data
+      labels = JSON.stringify(allStates);  // Convierte el array a una cadena JSON
+      data = JSON.stringify(allStates.map(state => stateCounts[state]));  // Convierte el array a una cadena JSON
+
+      console.log("Labels:", labels);
+      console.log("Data:", data);
+
+      // Establece el mensaje de éxito o error dependiendo de si se encontraron consultorías
+      if (chartResult.length === 0) {
+        message.error = 'No se ha subido ninguna consultoria';
+      } else {
+        message.success = 'Existen consultorías';
+      }
+
+      // Renderea la vista 'inicio_comite', pasando las consultorías y los datos del gráfico
+      res.render('inicio_comite', { consultorias: rows, labels: labels, data: data, message: message });
+    });
+  });
+};
+
 exports.inicio_admin_get = function (req, res) {
-  pool.query('SELECT * FROM usuario', function (err, result) {
+  let sqlQuery = 'SELECT * FROM usuario';
+  let rut = req.query.rut;
+
+  // Si se proporcionó un RUT, modificar la consulta SQL para filtrar por ese RUT
+  if (rut) {
+    sqlQuery += ' WHERE rut = ?';
+  }
+
+  pool.query(sqlQuery, [rut], function (err, result) {
     if (err) {
       handleError(res, err);
       return;
@@ -170,13 +230,19 @@ exports.inicio_admin_get = function (req, res) {
         return;
       }
 
+      const allStates = ['Analizando', 'Rechazado', 'Aceptado'];
+      const stateCounts = {};
+      allStates.forEach(state => { stateCounts[state] = 0; });
+      chartResult.forEach(row => { stateCounts[row.estado] = row.count; });
+
+      // Convierte los recuentos de estados en las cadenas labels y data
+      labels = JSON.stringify(allStates);  // Convierte el array a una cadena JSON
+      data = JSON.stringify(allStates.map(state => stateCounts[state]));  // Convierte el array a una cadena JSON
+
       if (chartResult.length === 0) {
         message.error = 'No se ha subido ninguna consultoria';
       } else {
-        // Convertir los datos del gráfico a cadenas para usar en la plantilla EJS
-        labels = chartResult.map(row => row.estado).join("','");
-        data = chartResult.map(row => row.count).join(',');
-        message.success = 'Existen consultorías'; // Aquí agregas tu mensaje de éxito
+        message.success = 'Existen consultorías';
       }
 
       // Renderizar la vista inicio_admin y proporcionar los datos de los usuarios
@@ -286,7 +352,6 @@ exports.actualizar_consultoria_get = (req, res) => {
   });
 };
 
-
 //Función para visualizar las consultorías
 exports.ver_consultorias_get = async (req, res) => {
   try {
@@ -304,7 +369,6 @@ exports.ver_consultorias_get = async (req, res) => {
     handleError(res, error);
   }
 };
-
 
 //Función para evaluar las consultorías
 exports.evaluar_consultoria_post = async (req, res) => {
@@ -337,58 +401,6 @@ exports.evaluar_consultoria_post = async (req, res) => {
   }
 };
 
-
-exports.inicio_comite_get = function(req, res, next) {
-  // Realiza la consulta SQL para obtener todas las consultorías y sus estados
-  pool.query('SELECT consultoria.*, estado_consultoria.estado FROM consultoria LEFT JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria', (err, rows) => {
-    if (err) {
-      console.log("Error en la primera consulta SQL:", err);
-      return;
-    }
-    
-    console.log("Resultados de la primera consulta SQL:", rows);
-
-    // Inicializa las variables que se utilizarán para los datos del gráfico
-    let labels = '';
-    let data = '';
-    let message = {};
-
-    // Realiza la consulta SQL para obtener el recuento de consultorías por estado
-    pool.query('SELECT estado_consultoria.estado, COUNT(consultoria.id_consultoria) AS count FROM consultoria INNER JOIN estado_consultoria ON consultoria.id_estado_consultoria = estado_consultoria.id_estado_consultoria GROUP BY estado_consultoria.estado', function(err, chartResult) {
-      if (err) {
-        console.log("Error en la segunda consulta SQL:", err);
-        return;
-      }
-
-      console.log("Resultados de la segunda consulta SQL:", chartResult);
-
-      // Define todos los estados posibles
-      const allStates = ['Analizando', 'Rechazado', 'Aceptado'];
-
-      // Crea un objeto con todos los estados y sus recuentos
-      const stateCounts = {};
-      allStates.forEach(state => { stateCounts[state] = 0; });
-      chartResult.forEach(row => { stateCounts[row.estado] = row.count; });
-
-      // Convierte los recuentos de estados en las cadenas labels y data
-      labels = allStates.join("','");
-      data = allStates.map(state => stateCounts[state]).join(',');
-
-      console.log("Labels:", labels);
-      console.log("Data:", data);
-
-      // Establece el mensaje de éxito o error dependiendo de si se encontraron consultorías
-      if (chartResult.length === 0) {
-        message.error = 'No se ha subido ninguna consultoria';
-      } else {
-        message.success = 'Existen consultorías';
-      }
-
-      // Renderea la vista 'inicio_comite', pasando las consultorías y los datos del gráfico
-      res.render('inicio_comite', { consultorias: rows, labels: labels, data: data, message: message });
-    });
-  });
-};
 
 
 
