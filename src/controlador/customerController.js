@@ -16,6 +16,11 @@ exports.registro_admin_get = async (req, res) => {
 exports.registro_admin_post = (req, res) => {
   const { nombre, correo_electronico, rut, rut_id, password, id_tipo_usuario, nombre_empresa, direccion, rubro } = req.body;
   bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (!validarRut(rut, rut_id)) {
+      // Si el rut no es válido, renderizamos la página de registro con un mensaje de error.
+      res.render('registrar_admin', { error: 'RUT no válido' });
+      return;
+  }
     if (err) {
       return handleError(res, err);
     }
@@ -28,6 +33,7 @@ exports.registro_admin_post = (req, res) => {
           return handleError(res, err);
         }
         const idempresa = newCompany.insertId;
+        
         pool.query(
           'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
           [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, idempresa],
@@ -309,11 +315,9 @@ exports.cargar_consultoria_post = (req, res) => {
 
 exports.actualizar_consultoria_post = (req, res) => {
   let id = req.params.id;
-  let newFileName = req.file.filename; // Obtén el nombre del archivo subido
-
   // Actualiza la consultoría en la base de datos
   // Reemplaza esta consulta SQL de acuerdo a tu esquema de base de datos
-  let sql = `UPDATE consultoria SET nombre_archivo = '${newFileName}' WHERE id_consultoria = ${id}`;
+  let sql = `UPDATE consultoria SET id_consultoria = ${id}`;
 
   db.query(sql, (err, result) => {
     if (err) throw err;
