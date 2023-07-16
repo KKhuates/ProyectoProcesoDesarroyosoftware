@@ -52,24 +52,20 @@
     </div>
     
     <script>
-      
-
       // Obtén el contexto del canvas
       var ctx = document.getElementById('myChart').getContext('2d');
 
       // Convierte las cadenas de etiquetas y datos en arrays
-      var labels = "<%= labels %>".split(',');  // Cambiamos las comillas simples por dobles
-    var data = "<%= data %>".split(',').map(Number);  // Cambiamos las comillas simples por dobles
+      var labels = "<%= labels %>".replace(/'/g, '"').split(','); 
+      var data = "<%= data %>".split(',').map(Number); 
 
-    
-    
 
       // Mapea los estados a los colores
       var colorMapping = {
-      'Analizando': { backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgba(54, 162, 235, 1)' },
-      'Rechazado': { backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)' },
-      'Aceptado': { backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)' }
-    };
+        'Analizando': { backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgba(54, 162, 235, 1)' },
+        'Rechazado': { backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)' },
+        'Aceptado': { backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)' }
+      };
 
       // Asigna los colores de acuerdo al mapeo
       var backgroundColors = labels.map(label => colorMapping[label].backgroundColor);
