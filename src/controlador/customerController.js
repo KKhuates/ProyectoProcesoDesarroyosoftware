@@ -27,10 +27,7 @@ exports.registro_admin_post = (req, res) => {
         if (err) {
           return handleError(res, err);
         }
-    
         const idempresa = newCompany.insertId;
-        console.log("id_empresa-->", idempresa);
-    
         pool.query(
           'INSERT INTO usuario (nombre, correo_electronico, password, rut, rut_id, id_tipo_usuario, id_empresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
           [nombre, correo_electronico, hashedPassword, rut, rut_id, id_tipo_usuario, idempresa],
@@ -38,7 +35,6 @@ exports.registro_admin_post = (req, res) => {
             if (err) {
               return handleError(res, err);
             }
-            console.log("newUser-->", newUser);
             res.render('login');
           }
         );
@@ -161,8 +157,6 @@ exports.inicio_comite_get = function(req, res, next) {
       return;
     }
     
-    console.log("Resultados de la primera consulta SQL:", rows);
-
     // Inicializa las variables que se utilizarán para los datos del gráfico
     let labels = '';
     let data = '';
@@ -174,8 +168,6 @@ exports.inicio_comite_get = function(req, res, next) {
         console.log("Error en la segunda consulta SQL:", err);
         return;
       }
-
-      console.log("Resultados de la segunda consulta SQL:", chartResult);
 
       // Define todos los estados posibles
       const allStates = ['Analizando', 'Rechazado', 'Aceptado'];
@@ -189,8 +181,7 @@ exports.inicio_comite_get = function(req, res, next) {
       labels = JSON.stringify(allStates);  // Convierte el array a una cadena JSON
       data = JSON.stringify(allStates.map(state => stateCounts[state]));  // Convierte el array a una cadena JSON
 
-      console.log("Labels:", labels);
-      console.log("Data:", data);
+    
 
       // Establece el mensaje de éxito o error dependiendo de si se encontraron consultorías
       if (chartResult.length === 0) {
@@ -272,13 +263,11 @@ exports.cargar_consultoria_get = function(req, res) {
 
 exports.cargar_consultoria_post = (req, res) => {
   const { nombre, descripcion } = req.body;
-
   // Verifica si req.file existe y contiene un archivo
   if (!req.file) {
     req.flash('error', 'No se cargó ningún archivo');
     return res.redirect('/paginaerror');
   }
-
   const archivo = req.file;
   const documento_archivo = archivo.buffer || archivo.path;
   if (!documento_archivo) {
@@ -297,10 +286,7 @@ exports.cargar_consultoria_post = (req, res) => {
         req.flash('error', 'Error al cargar el archivo');
         return res.redirect('/paginaerror');
       }
-  
       const idarchivos = newFile.insertId;
-      console.log("id_archivo-->", idarchivos);
-  
       // Inserta la consultoría
       pool.query(
         'INSERT INTO consultoria (nombre_archivo, descripcion_archivo, fecha_subida_archivo, id_usuario, id_archivos, id_estado_consultoria) VALUES (?, ?, ?, ?, ?, ?)',
@@ -313,8 +299,6 @@ exports.cargar_consultoria_post = (req, res) => {
           }
           
           const idconsultoria = newConsultoria.insertId;
-          console.log ("id_archivo, id_consultoria-->",idarchivos, idconsultoria);
-  
           req.flash('success', 'Archivo cargado correctamente');
           res.redirect('/inicio_estudiante');
         }
@@ -356,10 +340,6 @@ exports.actualizar_consultoria_get = (req, res) => {
 exports.ver_consultorias_get = async (req, res) => {
   try {
     const consultorias = await pool.query('SELECT consultoria.nombre_archivo, consultoria.descripcion_archivo, consultoria.fecha_subida_archivo, archivoSolicitud.archivo FROM consultoria AS consultoria INNER JOIN archivoSolicitud AS a ON consultoria.id_archivos = archivoSolicitud.id_archivos');
-
-    // Imprime las consultorías obtenidas de la base de datos
-    console.log('consultorias:', consultorias);
-
     if (Array.isArray(consultorias) && consultorias.length) {
       res.render('consultorias', { consultorias: consultorias, layout: 'layout' });
     } else {
@@ -375,9 +355,6 @@ exports.evaluar_consultoria_post = async (req, res) => {
   try {
     const { id_consultoria, nota } = req.body;
 
-    // Imprime el id de la consultoría y la nota
-    console.log(`id_consultoria: ${id_consultoria}, nota: ${nota}`);
-
     let id_estado_consultoria;
     if (nota >= 40) {
       id_estado_consultoria = 3;
@@ -386,10 +363,7 @@ exports.evaluar_consultoria_post = async (req, res) => {
     } else {
       id_estado_consultoria = 2;
     }
-
-    // Imprime el id del estado
-    console.log(`id_estado_consultoria: ${id_estado_consultoria}`);
-
+  
     await pool.query('UPDATE consultoria SET nota = ?, id_estado_consultoria = ? WHERE id_consultoria = ?', [nota, id_estado_consultoria, id_consultoria]);
 
     // Imprime un mensaje si la actualización tuvo éxito
