@@ -33,39 +33,63 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
-
 // Middleware para comprobar si el usuario está autenticado
 function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-      return next();
+    return next();
   } else {
-      res.redirect('/login');
+    res.redirect('/login');
   }
 }
 
-//POSTS
+// Middleware para comprobar el rol del usuario
+function checkRole(role) {
+  return function(req, res, next) {
+    if (req.user.role === role) {
+      return next();
+    } else {
+      res.redirect('/login');
+    }
+  }
+}
 
+// Definición de los roles
+const ROLES = {
+  ESTUDIANTE: 1,
+  ADMINISTRADOR: 2,
+  COMITE: 3
+};
 
+// Rutas que requieren autenticación y comprobación de roles
+router.get('/inicio_admin',
+  isAuthenticated,
+  checkRole(ROLES.ADMINISTRADOR),
+  customerController.inicio_admin_get
+);
+
+router.get('/inicio_comite',
+  isAuthenticated,
+  checkRole(ROLES.COMITE),
+  customerController.inicio_comite_get
+);
+
+// Otros endpoints POST
 router.post('/actualizar_consultoria/:id', upload.single('archivo'), customerController.actualizar_consultoria_post);
-router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post); //si
-router.post('/registrar_admin',customerController.registro_admin_post);//si 
-router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post ); //si
-router.post('/editar_usuario/:id', customerController.editar_usuario_post); //si 
-router.post('/login', customerController.login_post); //si
+router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post); 
+router.post('/registrar_admin', customerController.registro_admin_post);
+router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post);
+router.post('/editar_usuario/:id', customerController.editar_usuario_post);
+router.post('/login', customerController.login_post);
 
-
-//GET    
-
-router.get('/inicio_admin', customerController.inicio_admin_get); //si
-router.get('/login', customerController.login_get); //si
-router.get('/borrar_usuario/:id', customerController.borrar_usuario); //si
-router.get('/editar_usuario/:id', customerController.editar_usuario_get); //si
-router.get('/inicio_estudiante', customerController.inicio_estudiante_get); //si
-router.get('/cargar_consultoria', customerController.cargar_consultoria_get);//SI
-router.get('/registrar_admin',customerController.registro_admin_get); //si 
-router.get('/consultorias', customerController.ver_consultorias_get); //Si
+// Otros endpoints GET
+router.get('/login', customerController.login_get);
+router.get('/borrar_usuario/:id', customerController.borrar_usuario);
+router.get('/editar_usuario/:id', customerController.editar_usuario_get);
+router.get('/inicio_estudiante', customerController.inicio_estudiante_get);
+router.get('/cargar_consultoria', customerController.cargar_consultoria_get);
+router.get('/registrar_admin', customerController.registro_admin_get);
+router.get('/consultorias', customerController.ver_consultorias_get);
 router.get('/logout', customerController.logout);
-router.get('/inicio_comite', customerController.inicio_comite_get);
 router.get('/actualizar_consultoria/:id', customerController.actualizar_consultoria_get);
 
 module.exports = router;

@@ -5,11 +5,12 @@ const path = require('path');
 const mysql = require('mysql');
 const flash = require('connect-flash');
 const myConnection = require('express-myconnection');
+const bcrypt = require('bcrypt');  // Asegúrate de tener esto instalado
 const app = express();
 const expressLayouts = require('express-ejs-layouts');
 const customerController = require('./controlador/customerController');
-var passport = require('passport');
-
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 
 // Configuración de la sesión
 app.use(session({
@@ -35,26 +36,46 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 
 
-var LocalStrategy = require('passport-local').Strategy;
-
 // Configuración de la estrategia de autenticación local
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    // Aquí deberías buscar al usuario en la base de datos, y si el usuario existe y la contraseña es correcta, llamar a done(null, user)
+    const db = require('./db');  // Asegúrate de que esta ruta es correcta
+    db.query('SELECT * FROM usuario WHERE correo_electronico = ?', [username], function(err, results, fields) {
+      if (err) { done(err) }
+
+      if (results.length === 0) {
+        done(null, false, { message: 'Usuario no encontrado' });
+      } else {
+        const hash = results[0].password.toString();
+
+        bcrypt.compare(password, hash, function(err, response) {
+          if (response === true) {
+            return done(null, { user_id: results[0].id_usuario });
+          } else {
+            return done(null, false, { message: 'Contraseña incorrecta' });
+          }
+        });
+      }
+    });
   }
 ));
 
 // Función para serializar usuarios
 passport.serializeUser(function(user, done) {
-  done(null, user.id);
+  done(null, user.user_id);
 });
 
 // Función para deserializar usuarios
 passport.deserializeUser(function(id, done) {
-  // Aquí deberías buscar al usuario por id en la base de datos, y si el usuario existe, llamar a done(null, user)
+  const db = require('./db');  // Asegúrate de que esta ruta es correcta
+  db.query('SELECT id_usuario, id_tipo_usuario FROM usuario WHERE id_usuario = ?', [id], function(err, results, fields) {
+    if (results.length === 0) {
+      done(new Error('Usuario no encontrado'));
+    } else {
+      done(err, { user_id: results[0].id_usuario, role: results[0].id_tipo_usuario });
+    }
+  });
 });
-
-
 
 // Configuración de Flash y Middlewares
 app.use(flash());
