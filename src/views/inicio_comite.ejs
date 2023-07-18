@@ -15,7 +15,7 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Nombre Archivo</th>
+            <th>Nombre</th>
             <th>Fecha Subida</th>
             <th>Estado</th>
             <th>Calificar</th>
@@ -31,7 +31,10 @@
                 <form action="/evaluar_consultoria" method="POST">
                   <input type="checkbox" name="id_consultoria" value="<%= consultoria.id_consultoria %>">
                   <input type="number" name="nota" min="0" max="70">
+                  <textarea name="retroalimentacion" placeholder="Escribe la retroalimentación aquí"></textarea> <!-- Nuevo campo para retroalimentación -->
                   <button type="submit">Calificar</button>
+                  <td><a href="/descargar/<%= consultoria.id_archivos %>">Descargar archivo</a></td>
+
                 </form>
               </td>
             </tr>

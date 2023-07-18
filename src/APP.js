@@ -34,28 +34,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: true }));
 
-
-var LocalStrategy = require('passport-local').Strategy;
-
-// Configuración de la estrategia de autenticación local
-passport.use(new LocalStrategy(
-  function(username, password, done) {
-    // Aquí deberías buscar al usuario en la base de datos, y si el usuario existe y la contraseña es correcta, llamar a done(null, user)
-  }
-));
-
-// Función para serializar usuarios
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
-
-// Función para deserializar usuarios
-passport.deserializeUser(function(id, done) {
-  // Aquí deberías buscar al usuario por id en la base de datos, y si el usuario existe, llamar a done(null, user)
-});
-
-
-
 // Configuración de Flash y Middlewares
 app.use(flash());
 app.use(morgan('dev'));

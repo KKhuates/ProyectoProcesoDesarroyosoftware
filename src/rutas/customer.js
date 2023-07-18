@@ -3,6 +3,7 @@ const router = express.Router();
 const customerController = require('../controlador/customerController');
 const multer = require('multer');
 const path = require('path');
+  
 
 // Configuración de multer
 const storage = multer.diskStorage({
@@ -15,47 +16,46 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'application/pdf' || file.mimetype === 'application/msword' || 
-      file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-      file.mimetype === 'application/vnd.ms-excel' || file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
-      file.mimetype === 'application/vnd.ms-powerpoint' || file.mimetype === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Solo estos tipos de documentos, PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX !'), false);
+    cb(new Error('Solo se permiten los siguientes tipos de archivos: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX'), false);
   }
 };
 
-const upload = multer({
+const uploads = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 10 // Limita el tamaño del archivo a 10MB
+    fileSize: 1024 * 1024 * 100 // Limita el tamaño del archivo a 100MB
   },
   fileFilter: fileFilter
 });
 
 
-// Middleware para comprobar si el usuario está autenticado
-function isAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-      return next();
-  } else {
-      res.redirect('/login');
-  }
-}
 
 //POSTS
 
 
-router.post('/actualizar_consultoria/:id', upload.single('archivo'), customerController.actualizar_consultoria_post);
+router.post('/actualizar_consultoria/:id', uploads.single('archivo'), customerController.actualizar_consultoria_post);
 router.post('/evaluar_consultoria', customerController.evaluar_consultoria_post); //si
 router.post('/registrar_admin',customerController.registro_admin_post);//si 
-router.post('/cargar_consultoria', upload.single('archivo'), customerController.cargar_consultoria_post ); //si
+router.post('/cargar_consultoria', uploads.single('archivo'), customerController.cargar_consultoria_post ); //si
 router.post('/editar_usuario/:id', customerController.editar_usuario_post); //si 
 router.post('/login', customerController.login_post); //si
 
 
 //GET    
-
+router.get('/descargar/:id', customerController.descargar_archivo);
 router.get('/inicio_admin', customerController.inicio_admin_get); //si
 router.get('/login', customerController.login_get); //si
 router.get('/borrar_usuario/:id', customerController.borrar_usuario); //si

@@ -49,7 +49,7 @@ INSERT INTO estado_consultoria (estado) VALUES ('Aceptado');
 -- Creación de la tabla archivoSolicitud
 CREATE TABLE archivoSolicitud (
   id_archivos INT(11) NOT NULL AUTO_INCREMENT,
-  archivo LONGBLOB NOT NULL,
+  archivo VARCHAR(255) NOT NULL,
   fecha_subida DATETIME NOT NULL,
   PRIMARY KEY (id_archivos)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -63,6 +63,7 @@ CREATE TABLE consultoria (
   id_usuario INT(11) NOT NULL,
   id_archivos INT(11) NOT NULL,
   nota VARCHAR(255) NOT NULL,
+  retroalimentacion VARCHAR(255),
   id_estado_consultoria INT(11) NOT NULL,
   PRIMARY KEY (id_consultoria),
   FOREIGN KEY (id_estado_consultoria) REFERENCES estado_consultoria(id_estado_consultoria),
